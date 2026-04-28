@@ -3,26 +3,34 @@ import {
   BadRequestException,
   UnauthorizedException,
   ConflictException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
-import { CreateSignupDto, CreateLoginDto } from '../dto/allDTO';
+import {
+  CreateSignupDto,
+  CreateLoginDto,
+  VerifyOtpDto,
+  ForgotPasswordDto,
+  VerifyResetOtpDto,
+  ResetPasswordDto,
+} from '../dto/allDTO';
 import * as bcrypt from 'bcrypt';
+import { EmailService } from './email.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
   ) {}
 
   async signup(createSignupDto: CreateSignupDto): Promise<any> {
-    // 1. Validate password is provided
     if (!createSignupDto.password) {
       throw new BadRequestException('Password is required');
     }
 
-    // 2. Check if email already exists
     const existingUser = await this.userService.findUserByEmail(
       createSignupDto.email,
     );
@@ -30,27 +38,19 @@ export class AuthService {
       throw new ConflictException('Email already registered');
     }
 
-    // 3. Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(createSignupDto.password, salt);
 
-    // 4. Create user
     const user = await this.userService.registerUser({
       ...createSignupDto,
       password: hashedPassword,
+      isVerified: true,
+      otp: null,
+      otpExpiry: null,
+      resetOtp: null,
+      resetOtpExpiry: null,
     });
 
-    // 5. Generate JWT token
-    const accessToken = this.generateAccessToken(
-      user._id.toString(),
-      user.email,
-    );
-    const refreshToken = this.generateRefreshToken(
-      user._id.toString(),
-      user.email,
-    );
-
-    // 6. Return response without password
     return {
       success: true,
       data: {
@@ -59,26 +59,23 @@ export class AuthService {
           name: user.name,
           email: user.email,
           role: user.role,
+          isVerified: user.isVerified,
         },
-        accessToken,
-        refreshToken,
       },
+      message: 'User created successfully.',
     };
   }
 
   async login(createLoginDto: CreateLoginDto): Promise<any> {
-    // 1. Validate credentials are provided
     if (!createLoginDto.email || !createLoginDto.password) {
       throw new BadRequestException('Email and password are required');
     }
 
-    // 2. Find user by email
     const user = await this.userService.findUserByEmail(createLoginDto.email);
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    // 3. Compare password
     const passwordMatch = await bcrypt.compare(
       createLoginDto.password,
       user.password,
@@ -86,31 +83,148 @@ export class AuthService {
     if (!passwordMatch) {
       throw new UnauthorizedException('Invalid email or password');
     }
+    const otp = this.generateOtp();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+    await this.userService.updateUser(user._id.toString(), { otp, otpExpiry });
+    await this.emailService.sendOTP(user.email, otp);
 
-    // 4. Generate JWT token
+    return {
+      success: true,
+      message: 'OTP sent to your email. Please verify to complete login.',
+    };
+  }
+
+  async verifyOtp(verifyOtpDto: VerifyOtpDto): Promise<any> {
+    const user = await this.userService.findUserByEmail(verifyOtpDto.email);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.otp || !user.otpExpiry) {
+      throw new BadRequestException('OTP not found');
+    }
+
+    if (user.otp !== verifyOtpDto.otp) {
+      throw new BadRequestException('Invalid OTP');
+    }
+
+    if (user.otpExpiry.getTime() < Date.now()) {
+      throw new BadRequestException('OTP has expired');
+    }
+
+    const updatedUser = await this.userService.updateUser(user._id.toString(), {
+      otp: null,
+      otpExpiry: null,
+    });
+
+    if (!updatedUser) {
+      throw new NotFoundException('User not found');
+    }
+
     const accessToken = this.generateAccessToken(
-      user._id.toString(),
-      user.email,
+      updatedUser._id.toString(),
+      updatedUser.email,
     );
     const refreshToken = this.generateRefreshToken(
-      user._id.toString(),
-      user.email,
+      updatedUser._id.toString(),
+      updatedUser.email,
     );
 
-    // 5. Return response
     return {
       success: true,
       data: {
         user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
+          id: updatedUser._id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role,
         },
         accessToken,
         refreshToken,
       },
     };
+  }
+
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<any> {
+    const user = await this.userService.findUserByEmail(forgotPasswordDto.email);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const resetOtp = this.generateOtp();
+    const resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    await this.userService.updateUserByEmail(forgotPasswordDto.email, {
+      resetOtp,
+      resetOtpExpiry,
+    });
+    await this.emailService.sendResetOTP(user.email, resetOtp);
+
+    return {
+      success: true,
+      message: 'Reset OTP sent to your email.',
+    };
+  }
+
+  async verifyResetOtp(verifyResetOtpDto: VerifyResetOtpDto): Promise<any> {
+    const user = await this.userService.findUserByEmail(verifyResetOtpDto.email);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.resetOtp || !user.resetOtpExpiry) {
+      throw new BadRequestException('Reset OTP not found');
+    }
+
+    if (user.resetOtp !== verifyResetOtpDto.otp) {
+      throw new BadRequestException('Invalid OTP');
+    }
+
+    if (user.resetOtpExpiry.getTime() < Date.now()) {
+      throw new BadRequestException('OTP has expired');
+    }
+
+    return {
+      success: true,
+      message: 'Reset OTP verified successfully.',
+    };
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<any> {
+    const user = await this.userService.findUserByEmail(resetPasswordDto.email);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.resetOtp || !user.resetOtpExpiry) {
+      throw new BadRequestException('Reset OTP not found');
+    }
+
+    if (user.resetOtpExpiry.getTime() < Date.now()) {
+      throw new BadRequestException('OTP has expired');
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(resetPasswordDto.newPassword, salt);
+
+    await this.userService.updateUserByEmail(resetPasswordDto.email, {
+      password: hashedPassword,
+      resetOtp: null,
+      resetOtpExpiry: null,
+    });
+
+    return {
+      success: true,
+      message: 'Password reset successfully.',
+    };
+  }
+
+  private generateOtp(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
   private generateAccessToken(userId: string, email: string): string {

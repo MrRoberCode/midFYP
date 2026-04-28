@@ -20,6 +20,22 @@ export class UserService {
     return await this.userModel.findById(id).exec();
   }
 
+  async updateUser(
+    id: string,
+    data: Partial<User>,
+  ): Promise<UserDocument | null> {
+    return await this.userModel.findByIdAndUpdate(id, data, { new: true }).exec();
+  }
+
+  async updateUserByEmail(
+    email: string,
+    data: Partial<User>,
+  ): Promise<UserDocument | null> {
+    return await this.userModel
+      .findOneAndUpdate({ email: email.toLowerCase() }, data, { new: true })
+      .exec();
+  }
+
   async findAllUsers(): Promise<UserDocument[]> {
     return await this.userModel.find().select('-password').exec();
   }

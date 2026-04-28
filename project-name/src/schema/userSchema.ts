@@ -22,6 +22,21 @@ export class User {
   @Prop({ default: UserRole.User })
   role: UserRole;
 
+  @Prop({ default: false })
+  isVerified: boolean;
+
+  @Prop({ type: String, default: null })
+  otp: string | null;
+
+  @Prop({ type: Date, default: null })
+  otpExpiry: Date | null;
+
+  @Prop({ type: String, default: null })
+  resetOtp: string | null;
+
+  @Prop({ type: Date, default: null })
+  resetOtpExpiry: Date | null;
+
   @Prop({ default: Date.now })
   createdAt?: Date;
 

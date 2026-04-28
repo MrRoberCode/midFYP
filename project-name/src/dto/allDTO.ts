@@ -46,6 +46,52 @@ export class CreateLoginDto {
   password: string;
 }
 
+export class VerifyOtpDto {
+  @ApiProperty()
+  @IsEmail({}, { message: 'Please provide a valid email address' })
+  @IsNotEmpty({ message: 'Email is required' })
+  email: string;
+
+  @ApiProperty()
+  @IsString({ message: 'OTP must be a string' })
+  @IsNotEmpty({ message: 'OTP is required' })
+  @MinLength(6, { message: 'OTP must be 6 characters long' })
+  otp: string;
+}
+
+export class ForgotPasswordDto {
+  @ApiProperty()
+  @IsEmail({}, { message: 'Please provide a valid email address' })
+  @IsNotEmpty({ message: 'Email is required' })
+  email: string;
+}
+
+export class VerifyResetOtpDto {
+  @ApiProperty()
+  @IsEmail({}, { message: 'Please provide a valid email address' })
+  @IsNotEmpty({ message: 'Email is required' })
+  email: string;
+
+  @ApiProperty()
+  @IsString({ message: 'OTP must be a string' })
+  @IsNotEmpty({ message: 'OTP is required' })
+  @MinLength(6, { message: 'OTP must be 6 characters long' })
+  otp: string;
+}
+
+export class ResetPasswordDto {
+  @ApiProperty()
+  @IsEmail({}, { message: 'Please provide a valid email address' })
+  @IsNotEmpty({ message: 'Email is required' })
+  email: string;
+
+  @ApiProperty()
+  @IsString({ message: 'New password must be a string' })
+  @IsNotEmpty({ message: 'New password is required' })
+  @MinLength(6, { message: 'New password must be at least 6 characters long' })
+  newPassword: string;
+}
+
 // For backward compatibility
 export class RegisterUserDto {
    @ApiProperty()
@@ -69,4 +115,24 @@ export class RegisterUserDto {
   @IsEnum(UserRole)
   @IsOptional()
   role?: UserRole;
+
+  @ApiProperty({ required: false, default: false })
+  @IsOptional()
+  isVerified?: boolean;
+
+  @ApiProperty({ required: false, nullable: true })
+  @IsOptional()
+  otp?: string | null;
+
+  @ApiProperty({ required: false, nullable: true, type: String })
+  @IsOptional()
+  otpExpiry?: Date | null;
+
+  @ApiProperty({ required: false, nullable: true })
+  @IsOptional()
+  resetOtp?: string | null;
+
+  @ApiProperty({ required: false, nullable: true, type: String })
+  @IsOptional()
+  resetOtpExpiry?: Date | null;
 }
