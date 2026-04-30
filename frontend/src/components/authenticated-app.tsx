@@ -10,13 +10,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Channel, ChannelFilters, ChannelSort } from "stream-chat";
 import { User } from "../types/auth";
 import { useChatContext } from "stream-chat-react";
 
 import { v4 as uuidv4 } from "uuid";
 import { ChatProvider } from "../providers/chat-provider";
+import { BillingPage } from "./billing-page";
 import { ChatInterface } from "./chat-interface";
 import { ChatSidebar } from "./chat-sidebar";
 
@@ -36,9 +37,11 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [channelToDelete, setChannelToDelete] = useState<Channel | null>(null);
   const { client, setActiveChannel } = useChatContext();
+  const location = useLocation();
   const navigate = useNavigate();
   const { channelId } = useParams<{ channelId: string }>();
   const backendUrl = import.meta.env.VITE_AI_URL as string;
+  const isBillingView = location.pathname.startsWith("/billing");
 
   useEffect(() => {
     const syncChannelWithUrl = async () => {
@@ -163,13 +166,19 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
         onNewChat={handleNewChatClick}
         onChannelDelete={handleDeleteClick}
       />
-      <div className="flex-1 flex flex-col min-w-0">
-        <ChatInterface
-          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          onNewChatMessage={handleNewChatMessage}
-          backendUrl={backendUrl}
-        />
-      </div>
+      {isBillingView ? (
+        <div className="flex-1 min-w-0">
+          <BillingPage />
+        </div>
+      ) : (
+        <div className="flex-1 flex flex-col min-w-0">
+          <ChatInterface
+            onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            onNewChatMessage={handleNewChatMessage}
+            backendUrl={backendUrl}
+          />
+        </div>
+      )}
 
       {/* Delete Chat Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

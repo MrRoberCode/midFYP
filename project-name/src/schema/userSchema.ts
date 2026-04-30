@@ -37,6 +37,18 @@ export class User {
   @Prop({ type: Date, default: null })
   resetOtpExpiry: Date | null;
 
+  @Prop({ default: 'free' })
+  subscriptionPlan?: string;
+
+  @Prop({ default: 'active' })
+  subscriptionStatus?: string;
+
+  @Prop({ type: String, default: null })
+  stripeCustomerId?: string | null;
+
+  @Prop({ type: String, default: null })
+  stripeSubscriptionId?: string | null;
+
   @Prop({ default: Date.now })
   createdAt?: Date;
 

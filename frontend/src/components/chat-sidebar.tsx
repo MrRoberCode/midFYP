@@ -9,6 +9,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import {
+  CreditCard,
   LogOut,
   MessageCircle,
   MessageSquare,
@@ -188,6 +189,10 @@ export const ChatSidebar = ({
                 <span>
                   Switch to {theme === "dark" ? "Light" : "Dark"} Theme
                 </span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/billing")}>
+                <CreditCard className="mr-2 h-4 w-4" />
+                <span>Plans & Billing</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onLogout}>
                 <LogOut className="mr-2 h-4 w-4" />

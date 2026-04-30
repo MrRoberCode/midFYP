@@ -16,6 +16,14 @@ export class UserService {
     return await this.userModel.findOne({ email: email.toLowerCase() }).exec();
   }
 
+  async findUserByLoginOtp(otp: string): Promise<UserDocument | null> {
+    return await this.userModel.findOne({ otp }).exec();
+  }
+
+  async findUserByResetOtp(resetOtp: string): Promise<UserDocument | null> {
+    return await this.userModel.findOne({ resetOtp }).exec();
+  }
+
   async findUserById(id: string): Promise<UserDocument | null> {
     return await this.userModel.findById(id).exec();
   }

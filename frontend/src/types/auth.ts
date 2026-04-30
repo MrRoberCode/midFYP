@@ -3,6 +3,7 @@ export interface User {
   name: string;
   email: string;
   role: string;
+  isVerified?: boolean;
   image?: string;
 }
 
@@ -13,6 +14,17 @@ export interface AuthResponse {
     accessToken: string;
     refreshToken: string;
   };
+  message?: string;
+}
+
+export interface LoginStartResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface MessageResponse {
+  success: boolean;
+  message: string;
 }
 
 export interface AuthError {
