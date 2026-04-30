@@ -51,16 +51,21 @@ export class AuthService {
       resetOtpExpiry: null,
     });
 
+    const accessToken = this.generateAccessToken(
+      user._id.toString(),
+      user.email,
+    );
+    const refreshToken = this.generateRefreshToken(
+      user._id.toString(),
+      user.email,
+    );
+
     return {
       success: true,
       data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          isVerified: user.isVerified,
-        },
+        user: this.toAuthUser(user),
+        accessToken,
+        refreshToken,
       },
       message: 'User created successfully.',
     };
@@ -95,10 +100,10 @@ export class AuthService {
   }
 
   async verifyOtp(verifyOtpDto: VerifyOtpDto): Promise<any> {
-    const user = await this.userService.findUserByEmail(verifyOtpDto.email);
+    const user = await this.userService.findUserByLoginOtp(verifyOtpDto.otp);
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new BadRequestException('Invalid OTP');
     }
 
     if (!user.otp || !user.otpExpiry) {
@@ -135,10 +140,7 @@ export class AuthService {
       success: true,
       data: {
         user: {
-          id: updatedUser._id,
-          name: updatedUser.name,
-          email: updatedUser.email,
-          role: updatedUser.role,
+          ...this.toAuthUser(updatedUser),
         },
         accessToken,
         refreshToken,
@@ -169,10 +171,12 @@ export class AuthService {
   }
 
   async verifyResetOtp(verifyResetOtpDto: VerifyResetOtpDto): Promise<any> {
-    const user = await this.userService.findUserByEmail(verifyResetOtpDto.email);
+    const user = await this.userService.findUserByResetOtp(
+      verifyResetOtpDto.otp,
+    );
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new BadRequestException('Invalid OTP');
     }
 
     if (!user.resetOtp || !user.resetOtpExpiry) {
@@ -194,10 +198,12 @@ export class AuthService {
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<any> {
-    const user = await this.userService.findUserByEmail(resetPasswordDto.email);
+    const user = await this.userService.findUserByResetOtp(
+      resetPasswordDto.otp,
+    );
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new BadRequestException('Invalid OTP');
     }
 
     if (!user.resetOtp || !user.resetOtpExpiry) {
@@ -211,14 +217,32 @@ export class AuthService {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(resetPasswordDto.newPassword, salt);
 
-    await this.userService.updateUserByEmail(resetPasswordDto.email, {
+    const updatedUser = await this.userService.updateUser(user._id.toString(), {
       password: hashedPassword,
       resetOtp: null,
       resetOtpExpiry: null,
     });
 
+    if (!updatedUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const accessToken = this.generateAccessToken(
+      updatedUser._id.toString(),
+      updatedUser.email,
+    );
+    const refreshToken = this.generateRefreshToken(
+      updatedUser._id.toString(),
+      updatedUser.email,
+    );
+
     return {
       success: true,
+      data: {
+        user: this.toAuthUser(updatedUser),
+        accessToken,
+        refreshToken,
+      },
       message: 'Password reset successfully.',
     };
   }
@@ -243,6 +267,16 @@ export class AuthService {
       secret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
       expiresIn: '7d', // 🔁 REFRESH TOKEN = 7 DAYS
     });
+  }
+
+  private toAuthUser(user: any) {
+    return {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      isVerified: user.isVerified,
+    };
   }
 
   async validateUser(userId: string): Promise<any> {

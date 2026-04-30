@@ -48,11 +48,6 @@ export class CreateLoginDto {
 
 export class VerifyOtpDto {
   @ApiProperty()
-  @IsEmail({}, { message: 'Please provide a valid email address' })
-  @IsNotEmpty({ message: 'Email is required' })
-  email: string;
-
-  @ApiProperty()
   @IsString({ message: 'OTP must be a string' })
   @IsNotEmpty({ message: 'OTP is required' })
   @MinLength(6, { message: 'OTP must be 6 characters long' })
@@ -68,11 +63,6 @@ export class ForgotPasswordDto {
 
 export class VerifyResetOtpDto {
   @ApiProperty()
-  @IsEmail({}, { message: 'Please provide a valid email address' })
-  @IsNotEmpty({ message: 'Email is required' })
-  email: string;
-
-  @ApiProperty()
   @IsString({ message: 'OTP must be a string' })
   @IsNotEmpty({ message: 'OTP is required' })
   @MinLength(6, { message: 'OTP must be 6 characters long' })
@@ -81,9 +71,10 @@ export class VerifyResetOtpDto {
 
 export class ResetPasswordDto {
   @ApiProperty()
-  @IsEmail({}, { message: 'Please provide a valid email address' })
-  @IsNotEmpty({ message: 'Email is required' })
-  email: string;
+  @IsString({ message: 'OTP must be a string' })
+  @IsNotEmpty({ message: 'OTP is required' })
+  @MinLength(6, { message: 'OTP must be 6 characters long' })
+  otp: string;
 
   @ApiProperty()
   @IsString({ message: 'New password must be a string' })
