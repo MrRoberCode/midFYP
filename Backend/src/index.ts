@@ -145,8 +145,9 @@ app.post("/token", async (req, res) => {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ error: "userId is required" });
 
-    const issuedAt = Math.floor(Date.now() / 1000);
-    const expiration = issuedAt + 60 * 60;
+    const now = Math.floor(Date.now() / 1000);
+    const issuedAt = now - 60;
+    const expiration = now + 60 * 60;
     const token = serverClient.createToken(userId, expiration, issuedAt);
     res.json({ token });
   } catch (error) {
