@@ -1,10 +1,12 @@
+import { createHash } from "crypto";
 import Groq from "groq-sdk";
-// import pdfParse from "pdf-parse";
-// import * as pdfParse from "pdf-parse";
-const pdfParse = require("pdf-parse")
+
+const pdfParse = require("pdf-parse");
 
 export class FileUploadService {
   private groq: Groq;
+  private pdfCache = new Map<string, string>();
+  private imageCache = new Map<string, string>();
 
   constructor() {
     const apiKey = process.env.GROQ_API_KEY;
@@ -12,7 +14,6 @@ export class FileUploadService {
     this.groq = new Groq({ apiKey });
   }
 
-  // PDF Analysis
   analyzePDF = async (
     base64Data: string,
     fileName: string,
@@ -20,46 +21,48 @@ export class FileUploadService {
   ): Promise<string> => {
     console.log(`[FileUploadService] Analyzing PDF: ${fileName}`);
 
+    const cacheKey = this.createCacheKey("pdf", fileName, userPrompt, base64Data);
+    const cached = this.pdfCache.get(cacheKey);
+    if (cached) return cached;
+
     const buffer = Buffer.from(base64Data, "base64");
-const pdfData = await pdfParse(buffer);
+    const pdfData = await pdfParse(buffer);
     const extractedText = pdfData.text;
 
     if (!extractedText || extractedText.trim().length === 0) {
-      throw new Error("Could not extract text from PDF. The file may be scanned or image-based.");
+      throw new Error(
+        "Could not extract text from PDF. The file may be scanned or image-based."
+      );
     }
 
-    const truncatedText = extractedText.length > 8000
-      ? extractedText.substring(0, 8000) + "\n\n[Document truncated for analysis...]"
-      : extractedText;
-
-    const prompt = userPrompt || "Please analyze this document and provide a comprehensive summary with key insights, main topics, and any important information.";
+    const compactText = this.buildCompactDocumentContext(extractedText);
+    const prompt =
+      userPrompt?.trim() ||
+      "Summarize the document, list key points, and mention any important actions.";
 
     const response = await this.groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
-          content: `You are an expert document analyst and writing assistant. 
-When analyzing documents:
-- Extract key information, themes, and insights
-- Identify the document type and purpose  
-- Highlight important sections and data
-- Provide actionable recommendations
-- Be thorough but concise (under 600 words)`,
+          content:
+            "You analyze documents. Respond briefly with summary, key points, and actions only.",
         },
         {
           role: "user",
-          content: `Document: "${fileName}"\n\nContent:\n${truncatedText}\n\n---\n\n${prompt}`,
+          content: `Document: "${fileName}"\n\n${compactText}\n\nTask: ${prompt}`,
         },
       ],
-      temperature: 0.3,
-      max_tokens: 1500,
+      temperature: 0.2,
+      max_tokens: 500,
     });
 
-    return response.choices[0]?.message?.content || "Unable to analyze document.";
+    const result =
+      response.choices[0]?.message?.content || "Unable to analyze document.";
+    this.setCache(this.pdfCache, cacheKey, result);
+    return result;
   };
 
-  // Image Analysis
   analyzeImage = async (
     base64Data: string,
     mimeType: string,
@@ -68,17 +71,34 @@ When analyzing documents:
   ): Promise<string> => {
     console.log(`[FileUploadService] Analyzing image: ${fileName}`);
 
-    const supportedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+    const supportedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
     if (!supportedTypes.includes(mimeType)) {
-      throw new Error(`Unsupported image type: ${mimeType}. Use JPEG, PNG, GIF, or WebP.`);
+      throw new Error(
+        `Unsupported image type: ${mimeType}. Use JPEG, PNG, GIF, or WebP.`
+      );
     }
 
-    const prompt = userPrompt || "Please analyze this image in detail. Describe what you see, extract any text, and provide insights about the content.";
+    const cacheKey = this.createCacheKey("image", fileName, userPrompt, base64Data);
+    const cached = this.imageCache.get(cacheKey);
+    if (cached) return cached;
+
+    const prompt =
+      userPrompt?.trim() ||
+      "Describe the image briefly, extract visible text, and list useful insights.";
 
     const response = await this.groq.chat.completions.create({
-    //   model: "llama-3.2-90b-vision-preview",
-    model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
       messages: [
+        {
+          role: "system",
+          content: "Keep the answer concise and focused on the user's task.",
+        },
         {
           role: "user",
           content: [
@@ -95,12 +115,50 @@ When analyzing documents:
           ],
         },
       ],
-      temperature: 0.3,
-      max_tokens: 1500,
+      temperature: 0.2,
+      max_tokens: 500,
     });
 
-    return response.choices[0]?.message?.content || "Unable to analyze image.";
+    const result =
+      response.choices[0]?.message?.content || "Unable to analyze image.";
+    this.setCache(this.imageCache, cacheKey, result);
+    return result;
   };
-}
 
-// export const fileUploadService = new FileUploadService();
+  private buildCompactDocumentContext(text: string): string {
+    const cleaned = text.replace(/\s+/g, " ").trim();
+    if (cleaned.length <= 4500) return `Content:\n${cleaned}`;
+
+    const sliceLength = 1500;
+    const middleStart = Math.max(0, Math.floor(cleaned.length / 2) - 750);
+
+    const head = cleaned.slice(0, sliceLength);
+    const middle = cleaned.slice(middleStart, middleStart + sliceLength);
+    const tail = cleaned.slice(-sliceLength);
+
+    return [
+      "Document excerpts:",
+      `Start:\n${head}`,
+      `Middle:\n${middle}`,
+      `End:\n${tail}`,
+    ].join("\n\n");
+  }
+
+  private createCacheKey(
+    type: "pdf" | "image",
+    fileName: string,
+    prompt: string | undefined,
+    base64Data: string
+  ): string {
+    const fileHash = createHash("sha256").update(base64Data).digest("hex");
+    return `${type}:${fileName}:${prompt || ""}:${fileHash}`;
+  }
+
+  private setCache(cache: Map<string, string>, key: string, value: string) {
+    cache.set(key, value);
+    if (cache.size > 50) {
+      const firstKey = cache.keys().next().value;
+      if (firstKey) cache.delete(firstKey);
+    }
+  }
+}

@@ -9,7 +9,11 @@ import { WritingPromptsToolbar } from "./writing-prompts-toolbar";
 
 export interface ChatInputProps {
   className?: string;
-  sendMessage: (message: { text: string }) => Promise<void> | void;
+  sendMessage: (message: {
+    text: string;
+    attachments?: Array<Record<string, unknown>>;
+    skip_ai_analysis?: boolean;
+  }) => Promise<void> | void;
   isGenerating?: boolean;
   onStopGenerating?: () => void;
   placeholder?: string;
@@ -71,9 +75,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   const handleRemoveFile = () => {
-    if (selectedFile?.previewUrl) {
-      URL.revokeObjectURL(selectedFile.previewUrl);
-    }
     setSelectedFile(null);
   };
 
@@ -83,8 +84,30 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     setIsLoading(true);
     try {
-      // File + text ek saath bhejo
       if (selectedFile && channelId && backendUrl) {
+        const messageText = value.trim() || `Analyze this ${selectedFile.mimeType.startsWith("image/") ? "image" : "file"}`;
+        const attachment = selectedFile.mimeType.startsWith("image/")
+          ? {
+              type: "image",
+              image_url: selectedFile.previewUrl,
+              fallback: selectedFile.fileName,
+              mime_type: selectedFile.mimeType,
+              title: selectedFile.fileName,
+            }
+          : {
+              type: "file",
+              asset_url: `data:${selectedFile.mimeType};base64,${selectedFile.base64}`,
+              mime_type: selectedFile.mimeType,
+              title: selectedFile.fileName,
+              file_size: selectedFile.base64.length,
+            };
+
+        await sendMessage({
+          text: messageText,
+          attachments: [attachment],
+          skip_ai_analysis: true,
+        });
+
         const response = await fetch(`${backendUrl}/analyze-file`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -102,12 +125,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           const err = await response.json();
           throw new Error(err.reason || "File analysis failed");
         }
-
-        // File remove karo
         handleRemoveFile();
         onValueChange("");
       } else if (value.trim()) {
-        // Normal text message
         await sendMessage({ text: value.trim() });
         onValueChange("");
       }

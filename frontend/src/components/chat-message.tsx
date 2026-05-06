@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Bot, Check, Copy } from "lucide-react";
+import { Bot, Check, Copy, FileText } from "lucide-react";
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import {
@@ -24,6 +24,7 @@ const ChatMessage: React.FC = () => {
 
   const isUser = !message.user?.id?.startsWith("ai-bot");
   const [copied, setCopied] = useState(false);
+  const attachments = message.attachments || [];
 
   const copyToClipboard = async () => {
     if (streamedMessageText) {
@@ -88,6 +89,43 @@ const ChatMessage: React.FC = () => {
                 : "str-chat__message-bubble rounded-bl-md"
             )}
           >
+            {attachments.length > 0 && (
+              <div className="mb-3 space-y-2">
+                {attachments.map((attachment, index) => {
+                  const isImage =
+                    attachment.type === "image" || !!attachment.image_url;
+
+                  if (isImage && attachment.image_url) {
+                    return (
+                      <img
+                        key={attachment.id || index}
+                        src={attachment.image_url}
+                        alt={attachment.title || "Uploaded image"}
+                        className="max-h-60 w-full rounded-xl object-cover border border-border/50"
+                      />
+                    );
+                  }
+
+                  return (
+                    <div
+                      key={attachment.id || index}
+                      className="flex items-center gap-3 rounded-xl border border-border/50 bg-background/40 p-3"
+                    >
+                      <FileText className="h-5 w-5 shrink-0 text-muted-foreground" />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">
+                          {attachment.title || "Attachment"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {attachment.mime_type || attachment.type || "File"}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Message Text */}
             <div className="break-words">
               <ReactMarkdown

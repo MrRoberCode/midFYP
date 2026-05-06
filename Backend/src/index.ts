@@ -23,6 +23,37 @@ const aiAgentCache = new Map<string, AIAgent>();
 const pendingAiAgents = new Set<string>();
 const inactivityThreshold = 480 * 60 * 1000;
 
+const clampText = (text: string, maxLength: number) =>
+  text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+
+const buildCompactConversation = (
+  messages: { text?: string; user?: { id?: string; name?: string } | null }[]
+) =>
+  messages
+    .filter((m) => m.text?.trim())
+    .slice(-20)
+    .map((m) => {
+      const role = m.user?.id?.startsWith("ai-bot")
+        ? "AI"
+        : m.user?.name || "User";
+      return `${role}: ${clampText(m.text!.trim(), 240)}`;
+    })
+    .join("\n");
+
+const getLocalWritingStats = (text: string) => {
+  const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const sentenceCount = text
+    .split(/[.!?]+/)
+    .map((part) => part.trim())
+    .filter(Boolean).length;
+
+  return {
+    word_count: wordCount,
+    sentence_count: sentenceCount,
+    reading_time_minutes: Math.max(1, Math.ceil(wordCount / 200)),
+  };
+};
+
 setInterval(async () => {
   const now = Date.now();
   for (const [userId, aiAgent] of aiAgentCache) {
@@ -207,7 +238,7 @@ app.post("/templates/apply", async (req, res) => {
 
 // Chat summary using Groq
 app.post("/summarize-chat", async (req, res) => {
-  const { channelId, channelType = "messaging", messageLimit = 50 } =
+  const { channelId, channelType = "messaging", messageLimit = 20 } =
     req.body as ChatSummaryRequest;
 
   if (!channelId) return res.status(400).json({ error: "Missing channelId" });
@@ -218,20 +249,16 @@ app.post("/summarize-chat", async (req, res) => {
     const channel = serverClient.channel(channelType, channelId);
     await channel.watch();
 
-    const response = await channel.query({ messages: { limit: messageLimit } });
+    const response = await channel.query({
+      messages: { limit: Math.min(messageLimit, 20) },
+    });
     const messages = response.messages || [];
 
     if (messages.length === 0) {
       return res.json({ success: true, summary: "No messages found.", messageCount: 0 });
     }
 
-    const conversationText = messages
-      .filter((m) => m.text?.trim())
-      .map((m) => {
-        const role = m.user?.id?.startsWith("ai-bot") ? "AI Assistant" : m.user?.name || "User";
-        return `${role}: ${m.text}`;
-      })
-      .join("\n\n");
+    const conversationText = buildCompactConversation(messages);
 
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 
@@ -240,22 +267,16 @@ app.post("/summarize-chat", async (req, res) => {
       messages: [
         {
           role: "system",
-          content: "You are an expert at summarizing writing sessions. Be concise and organized.",
+          content:
+            "Summarize writing sessions briefly with topics, work done, decisions, and next step.",
         },
         {
           role: "user",
-          content: `Summarize this writing session. Include:
-1. **Main Topics**: What writing tasks were worked on
-2. **Content Created**: What was written or edited
-3. **Key Decisions**: Important choices made
-4. **Next Steps**: Any unfinished tasks
-
-CONVERSATION:
-${conversationText}`,
+          content: `Summarize this session in 4 short sections: Main Topics, Content Created, Key Decisions, Next Step.\n\n${conversationText}`,
         },
       ],
-      temperature: 0.3,
-      max_tokens: 1024,
+      temperature: 0.2,
+      max_tokens: 260,
     });
 
     const summary = summaryResponse.choices[0]?.message?.content || "Unable to generate summary.";
@@ -323,33 +344,29 @@ app.post("/analyze-writing", async (req, res) => {
 
   try {
     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+    const compactText = clampText(String(text).trim(), 5000);
+    const localStats = getLocalWritingStats(compactText);
 
     const analysisResponse = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
-          content: "You are a writing analysis expert. Always respond with valid JSON only, no markdown.",
+          content:
+            "Return valid JSON only. Be concise. Focus on readability, tone, grammar, strengths, and improvements.",
         },
         {
           role: "user",
-          content: `Analyze this text and return ONLY a JSON object:
-{
-  "overall_score": <1-10>,
-  "readability": { "score": <1-10>, "level": "<Very Easy|Easy|Standard|Fairly Difficult|Difficult>", "feedback": "<feedback>" },
-  "tone": { "primary": "<professional|casual|academic|persuasive|creative>", "sentiment": "<positive|neutral|negative|mixed>", "feedback": "<feedback>" },
-  "grammar": { "score": <1-10>, "issues_found": <number>, "issues": ["<issue>"] },
-  "strengths": ["<strength1>", "<strength2>", "<strength3>"],
-  "improvements": ["<improvement1>", "<improvement2>", "<improvement3>"],
-  "stats": { "word_count": <number>, "sentence_count": <number>, "reading_time_minutes": <number> }
-}
+          content: `Analyze the text and return JSON with keys:
+overall_score, readability{score,level,feedback}, tone{primary,sentiment,feedback}, grammar{score,issues_found,issues}, strengths, improvements.
+Keep arrays short.
 
 TEXT:
-${text}`,
+${compactText}`,
         },
       ],
       temperature: 0.1,
-      max_tokens: 1024,
+      max_tokens: 420,
     });
 
     const rawResponse = analysisResponse.choices[0]?.message?.content || "{}";
@@ -358,6 +375,7 @@ ${text}`,
     try {
       const cleanJson = rawResponse.replace(/```json\n?|\n?```/g, "").trim();
       analysisData = JSON.parse(cleanJson);
+      analysisData.stats = localStats;
     } catch {
       analysisData = { error: "Failed to parse analysis" };
     }

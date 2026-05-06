@@ -40,7 +40,7 @@ export const FileUploadButton: React.FC<FileUploadButtonProps> = ({
 
     const base64 = await fileToBase64(file);
     const previewUrl = file.type.startsWith("image/")
-      ? URL.createObjectURL(file)
+      ? `data:${file.type};base64,${base64}`
       : undefined;
 
     onFileSelect({

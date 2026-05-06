@@ -37,8 +37,8 @@ export class GroqResponseHandler {
         model: "llama-3.3-70b-versatile",
         messages: this.conversationHistory,
         stream: true,
-        temperature: 0.7,
-        max_tokens: 2048,
+        temperature: 0.4,
+        max_tokens: 420,
       });
 
       for await (const chunk of stream) {
