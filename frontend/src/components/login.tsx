@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ArrowLeft, Bot, Loader2, MailCheck, ShieldCheck } from "lucide-react";
+import { usePreferences } from "@/contexts/preferences-context";
 import { Button } from "./ui/button";
 import {
   Card,
@@ -10,11 +11,7 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Input } from "./ui/input";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "./ui/input-otp";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
 import { Label } from "./ui/label";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../hooks/use-toast";
@@ -23,9 +20,15 @@ interface LoginProps {
   onSwitchToSignup: () => void;
 }
 
-type AuthStep = "login" | "loginOtp" | "forgotEmail" | "forgotOtp" | "resetPassword";
+type AuthStep =
+  | "login"
+  | "loginOtp"
+  | "forgotEmail"
+  | "forgotOtp"
+  | "resetPassword";
 
 export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
+  const { t } = usePreferences();
   const [step, setStep] = useState<AuthStep>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,96 +50,39 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
     const errorData = error.response?.data;
 
     if (errorData) {
-      if (Array.isArray(errorData.message)) {
-        return errorData.message.join(", ");
-      }
-      if (typeof errorData.message === "string") {
-        return errorData.message;
-      }
-      if (errorData.error) {
-        return errorData.error;
-      }
+      if (Array.isArray(errorData.message)) return errorData.message.join(", ");
+      if (typeof errorData.message === "string") return errorData.message;
+      if (errorData.error) return errorData.error;
     }
 
     return error.message || fallback;
   };
 
-  const resetToLogin = () => {
-    setStep("login");
-    setOtp("");
-    setNewPassword("");
-  };
-
-  const handleLogin = async () => {
-    if (!email || !password) return;
-
-    await login(email, password);
-    setOtp("");
-    setStep("loginOtp");
-    toast({
-      title: "OTP sent",
-      description: "Check your email to complete login.",
-    });
-  };
-
-  const handleLoginOtp = async () => {
-    if (otp.length !== 6) return;
-
-    await verifyLoginOtp(otp);
-    toast({
-      title: "Success",
-      description: "Logged in successfully!",
-    });
-  };
-
-  const handleForgotEmail = async () => {
-    if (!email) return;
-
-    await forgotPassword(email);
-    setOtp("");
-    setStep("forgotOtp");
-    toast({
-      title: "OTP sent",
-      description: "Check your email to reset your password.",
-    });
-  };
-
-  const handleForgotOtp = async () => {
-    if (otp.length !== 6) return;
-
-    await verifyResetOtp(otp);
-    setStep("resetPassword");
-    toast({
-      title: "OTP verified",
-      description: "Set a new password to continue.",
-    });
-  };
-
-  const handleResetPassword = async () => {
-    if (otp.length !== 6 || !newPassword) return;
-
-    await resetPassword(otp, newPassword);
-    toast({
-      title: "Password updated",
-      description: "You are signed in now.",
-    });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setIsSubmitting(true);
+
     try {
       if (step === "login") {
-        await handleLogin();
+        if (!email || !password) return;
+        await login(email, password);
+        setOtp("");
+        setStep("loginOtp");
       } else if (step === "loginOtp") {
-        await handleLoginOtp();
+        if (otp.length !== 6) return;
+        await verifyLoginOtp(otp);
       } else if (step === "forgotEmail") {
-        await handleForgotEmail();
+        if (!email) return;
+        await forgotPassword(email);
+        setOtp("");
+        setStep("forgotOtp");
       } else if (step === "forgotOtp") {
-        await handleForgotOtp();
+        if (otp.length !== 6) return;
+        await verifyResetOtp(otp);
+        setStep("resetPassword");
       } else {
-        await handleResetPassword();
+        if (otp.length !== 6 || !newPassword) return;
+        await resetPassword(otp, newPassword);
       }
     } catch (error: any) {
       console.error("Authentication error details:", error.response?.data);
@@ -155,42 +101,42 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
 
   const screenCopy = {
     login: {
-      title: "Welcome Back",
-      description: "Enter your credentials to access your account.",
-      action: "Log In",
-      loading: "Logging in...",
+      title: t("auth.welcomeBack"),
+      description: t("auth.loginDescription"),
+      action: t("auth.logIn"),
+      loading: t("auth.loggingIn"),
     },
     loginOtp: {
-      title: "Verify Login OTP",
-      description: "Enter the OTP sent to your email.",
-      action: "Verify OTP",
-      loading: "Verifying...",
+      title: t("auth.verifyLoginOtp"),
+      description: t("auth.otpDescription"),
+      action: t("auth.verifyLoginOtp"),
+      loading: t("auth.verifying"),
     },
     forgotEmail: {
-      title: "Reset Password",
-      description: "Enter your email and we will send a reset OTP.",
-      action: "Send OTP",
-      loading: "Sending...",
+      title: t("auth.resetPassword"),
+      description: t("auth.resetDescription"),
+      action: t("auth.sendOtp"),
+      loading: t("auth.sending"),
     },
     forgotOtp: {
-      title: "Verify Reset OTP",
-      description: "Enter the OTP sent to your email.",
-      action: "Verify OTP",
-      loading: "Verifying...",
+      title: t("auth.verifyResetOtp"),
+      description: t("auth.otpDescription"),
+      action: t("auth.verifyResetOtp"),
+      loading: t("auth.verifying"),
     },
     resetPassword: {
-      title: "Create New Password",
-      description: "Choose a new password for your account.",
-      action: "Update Password",
-      loading: "Updating...",
+      title: t("auth.createNewPassword"),
+      description: t("auth.newPasswordDescription"),
+      action: t("auth.updatePassword"),
+      loading: t("auth.updating"),
     },
   }[step];
 
   return (
     <div className="flex h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-2">
-          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mx-auto">
+        <CardHeader className="space-y-2 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
             {isOtpStep ? (
               <ShieldCheck className="h-6 w-6 text-primary-foreground" />
             ) : step === "forgotEmail" || step === "resetPassword" ? (
@@ -210,7 +156,7 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {(step === "login" || step === "forgotEmail") && (
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("auth.email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -224,11 +170,11 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
 
             {step === "login" && (
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("auth.password")}</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Password"
+                  placeholder={t("auth.password")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -238,7 +184,7 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
 
             {isOtpStep && (
               <div className="space-y-2">
-                <Label htmlFor="otp">OTP</Label>
+                <Label htmlFor="otp">{t("auth.otp")}</Label>
                 <InputOTP
                   id="otp"
                   maxLength={6}
@@ -257,11 +203,11 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
 
             {step === "resetPassword" && (
               <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
+                <Label htmlFor="newPassword">{t("auth.newPassword")}</Label>
                 <Input
                   id="newPassword"
                   type="password"
-                  placeholder="New password"
+                  placeholder={t("auth.newPassword")}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
@@ -292,25 +238,29 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
                 }}
                 className="text-sm font-medium text-primary hover:underline"
               >
-                Forgot password?
+                {t("auth.forgotPassword")}
               </button>
               <div className="text-sm text-muted-foreground">
-                Don&apos;t have an account?{" "}
+                {t("auth.noAccount")}{" "}
                 <button
                   onClick={onSwitchToSignup}
                   className="font-medium text-primary hover:underline"
                 >
-                  Sign up
+                  {t("auth.signUp")}
                 </button>
               </div>
             </>
           ) : (
             <button
-              onClick={resetToLogin}
+              onClick={() => {
+                setStep("login");
+                setOtp("");
+                setNewPassword("");
+              }}
               className="inline-flex items-center text-sm font-medium text-primary hover:underline"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to login
+              {t("auth.backToLogin")}
             </button>
           )}
         </CardFooter>

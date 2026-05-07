@@ -1,4 +1,6 @@
+import { useEffect, useRef, useState } from "react";
 import { useAIAgentStatus } from "@/hooks/use-ai-agent-status";
+import { usePreferences } from "@/contexts/preferences-context";
 import {
   Bot,
   Briefcase,
@@ -8,7 +10,6 @@ import {
   MessageSquare,
   Sparkles,
 } from "lucide-react";
-import { useRef, useState } from "react";
 import {
   Channel,
   MessageList,
@@ -18,12 +19,11 @@ import {
   useChatContext,
   Window,
 } from "stream-chat-react";
-import { AIAgentControl } from "./ai-agent-control";
-import { ChatInput, ChatInputProps } from "./chat-input";
+import { ChatInput, type ChatInputProps } from "./chat-input";
 import ChatMessage from "./chat-message";
+import { SettingsDialog } from "./settings-dialog";
 import { Button } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { useEffect } from "react";
 
 interface ChatInterfaceProps {
   onToggleSidebar: () => void;
@@ -35,83 +35,76 @@ const EmptyStateWithInput: React.FC<{
   onNewChatMessage: ChatInputProps["sendMessage"];
 }> = ({ onNewChatMessage }) => {
   const [inputText, setInputText] = useState("");
+  const { t } = usePreferences();
 
-  // Research-based writing prompts organized by category
   const writingCategories = [
     {
       id: "business",
       icon: <Briefcase className="h-4 w-4" />,
-      title: "Business",
+      title: t("chat.business"),
       prompts: [
-        "Write a professional email to my boss about a project update",
-        "Draft a compelling LinkedIn post about a recent achievement",
-        "Create an executive summary for a quarterly business report",
-        "Write a persuasive proposal for a new marketing campaign",
+        t("chat.prompt.business1"),
+        t("chat.prompt.business2"),
+        t("chat.prompt.business3"),
+        t("chat.prompt.business4"),
       ],
     },
     {
       id: "content",
       icon: <FileText className="h-4 w-4" />,
-      title: "Content",
+      title: t("chat.content"),
       prompts: [
-        "Write a blog post about emerging trends in my industry",
-        "Create engaging social media captions for a product launch",
-        "Draft a newsletter that drives customer engagement",
-        "Write compelling product descriptions that convert",
+        t("chat.prompt.content1"),
+        t("chat.prompt.content2"),
+        t("chat.prompt.content3"),
+        t("chat.prompt.content4"),
       ],
     },
     {
       id: "communication",
       icon: <MessageSquare className="h-4 w-4" />,
-      title: "Communication",
+      title: t("chat.communication"),
       prompts: [
-        "Rewrite this text to be more clear and concise",
-        "Improve the tone of this message to sound more professional",
-        "Create a presentation script that keeps audiences engaged",
-        "Write customer service responses that build trust",
+        t("chat.prompt.communication1"),
+        t("chat.prompt.communication2"),
+        t("chat.prompt.communication3"),
+        t("chat.prompt.communication4"),
       ],
     },
     {
       id: "creative",
       icon: <Lightbulb className="h-4 w-4" />,
-      title: "Creative",
+      title: t("chat.creative"),
       prompts: [
-        "Brainstorm innovative solutions for a common problem",
-        "Generate creative angles for a story or article",
-        "Develop character backstories for creative writing",
-        "Create compelling headlines that grab attention",
+        t("chat.prompt.creative1"),
+        t("chat.prompt.creative2"),
+        t("chat.prompt.creative3"),
+        t("chat.prompt.creative4"),
       ],
     },
   ];
 
-  const handlePromptClick = (prompt: string) => {
-    setInputText(prompt);
-  };
-
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="flex-1 flex items-center justify-center overflow-y-auto p-6">
-        <div className="text-center max-w-3xl w-full">
-          {/* Hero Section */}
+    <div className="flex h-full flex-col bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="flex flex-1 items-center justify-center overflow-y-auto p-6">
+        <div className="w-full max-w-3xl text-center">
           <div className="mb-6">
-            <div className="relative inline-flex items-center justify-center w-16 h-16 mb-4">
-              <div className="absolute inset-0 bg-primary/20 rounded-2xl animate-pulse"></div>
-              <Bot className="h-8 w-8 text-primary relative z-10" />
-              <Sparkles className="h-4 w-4 text-primary/60 absolute -top-1 -right-1" />
+            <div className="relative mb-4 inline-flex h-16 w-16 items-center justify-center">
+              <div className="absolute inset-0 rounded-2xl bg-primary/20 animate-pulse"></div>
+              <Bot className="relative z-10 h-8 w-8 text-primary" />
+              <Sparkles className="absolute -right-1 -top-1 h-4 w-4 text-primary/60" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">
-              Your AI Writing Partner
+            <h1 className="mb-2 text-2xl font-bold text-foreground">
+              {t("chat.heroTitle")}
             </h1>
-            <p className="text-sm text-muted-foreground mb-4">
-              From first drafts to final edits, I'm here to help you write
-              better, faster.
+            <p className="mb-4 text-sm text-muted-foreground">
+              {t("chat.heroDescription")}
             </p>
           </div>
 
-          {/* Writing Prompt Categories - Tabbed Interface */}
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-foreground mb-4">
-              What would you like to write today?
+            <h2 className="mb-4 text-lg font-semibold text-foreground">
+              {t("chat.writeToday")}
             </h2>
 
             <Tabs defaultValue="business" className="w-full">
@@ -134,14 +127,14 @@ const EmptyStateWithInput: React.FC<{
                   value={category.id}
                   className="mt-4"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
                     {category.prompts.map((prompt, promptIndex) => (
                       <button
                         key={promptIndex}
-                        onClick={() => handlePromptClick(prompt)}
-                        className="p-3 text-left text-sm rounded-lg bg-muted/30 hover:bg-muted/50 transition-all duration-200 border border-muted/50 hover:border-muted group"
+                        onClick={() => setInputText(prompt)}
+                        className="group rounded-lg border border-muted/50 bg-muted/30 p-3 text-left text-sm transition-all duration-200 hover:border-muted hover:bg-muted/50"
                       >
-                        <span className="text-foreground group-hover:text-primary transition-colors">
+                        <span className="text-foreground transition-colors group-hover:text-primary">
                           {prompt}
                         </span>
                       </button>
@@ -154,22 +147,21 @@ const EmptyStateWithInput: React.FC<{
         </div>
       </div>
 
-      {/* Input Area */}
       <div className="border-t bg-background/95 backdrop-blur-sm">
         <div className="p-4">
           <ChatInput
             sendMessage={onNewChatMessage}
-            placeholder="Describe what you'd like to write, or paste text to improve..."
+            placeholder={t("chat.inputPlaceholder")}
             value={inputText}
             onValueChange={setInputText}
             className="!p-4"
             isGenerating={false}
             onStopGenerating={() => {}}
           />
-          <div className="flex items-center justify-center gap-4 mt-3 text-xs text-muted-foreground">
-            <span>Press Enter to send</span>
-            <span>•</span>
-            <span>Shift + Enter for new line</span>
+          <div className="mt-3 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+            <span>{t("chat.pressEnter")}</span>
+            <span>&bull;</span>
+            <span>{t("chat.shiftEnter")}</span>
           </div>
         </div>
       </div>
@@ -177,28 +169,31 @@ const EmptyStateWithInput: React.FC<{
   );
 };
 
-const MessageListEmptyIndicator = () => (
-  <div className="h-full flex items-center justify-center">
-    <div className="text-center px-4">
-      <div className="relative inline-flex items-center justify-center w-12 h-12 mb-4">
-        <div className="absolute inset-0 bg-primary/10 rounded-xl"></div>
-        <Bot className="h-6 w-6 text-primary/80 relative z-10" />
+const MessageListEmptyIndicator = () => {
+  const { t } = usePreferences();
+
+  return (
+    <div className="flex h-full items-center justify-center">
+      <div className="px-4 text-center">
+        <div className="relative mb-4 inline-flex h-12 w-12 items-center justify-center">
+          <div className="absolute inset-0 rounded-xl bg-primary/10"></div>
+          <Bot className="relative z-10 h-6 w-6 text-primary/80" />
+        </div>
+        <h2 className="mb-2 text-lg font-medium text-foreground">
+          {t("chat.readyTitle")}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {t("chat.readyDescription")}
+        </p>
       </div>
-      <h2 className="text-lg font-medium text-foreground mb-2">
-        Ready to Write
-      </h2>
-      <p className="text-sm text-muted-foreground">
-        Start the conversation and let's create something amazing together.
-      </p>
     </div>
-  </div>
-);
+  );
+};
 
 const MessageListContent = () => {
   const { messages, thread } = useChannelStateContext();
-  const isThread = !!thread;
 
-  if (isThread) return null;
+  if (thread) return null;
 
   return (
     <div className="flex-1 min-h-0">
@@ -217,22 +212,22 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   backendUrl,
 }) => {
   const { channel } = useChatContext();
+  const { t } = usePreferences();
   const agentStatus = useAIAgentStatus({
     channelId: channel?.id ?? null,
     backendUrl,
   });
-    useEffect(() => {
+
+  useEffect(() => {
     if (channel?.id && agentStatus.status === "disconnected") {
       agentStatus.connectAgent();
     }
-  }, [channel?.id]);
-
- // chat-interface.tsx mein ChannelMessageInputComponent replace karo:
+  }, [agentStatus, channel?.id]);
 
   const ChannelMessageInputComponent = () => {
     const { sendMessage } = useChannelActionContext();
-    const { channel, messages } = useChannelStateContext();
-    const { aiState } = useAIState(channel);
+    const { channel: activeChannel, messages } = useChannelStateContext();
+    const { aiState } = useAIState(activeChannel);
     const [inputText, setInputText] = useState("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -242,17 +237,18 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       aiState === "AI_STATE_EXTERNAL_SOURCES";
 
     const handleStopGenerating = () => {
-      if (channel) {
-        const aiMessage = [...messages]
-          .reverse()
-          .find((m) => m.user?.id.startsWith("ai-bot"));
-        if (aiMessage) {
-          channel.sendEvent({
-            type: "ai_indicator.stop",
-            cid: channel.cid,
-            message_id: aiMessage.id,
-          });
-        }
+      if (!activeChannel) return;
+
+      const aiMessage = [...messages]
+        .reverse()
+        .find((message) => message.user?.id.startsWith("ai-bot"));
+
+      if (aiMessage) {
+        activeChannel.sendEvent({
+          type: "ai_indicator.stop",
+          cid: activeChannel.cid,
+          message_id: aiMessage.id,
+        });
       }
     };
 
@@ -266,56 +262,58 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         className="!p-4"
         isGenerating={isGenerating}
         onStopGenerating={handleStopGenerating}
-        channelId={channel?.id}         // ADD KARO
-        backendUrl={backendUrl}          // ADD KARO
+        channelId={activeChannel?.id}
+        backendUrl={backendUrl}
       />
     );
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
-      {/* Enhanced Header */}
-      <header className="flex-shrink-0 flex items-center justify-between px-4 py-3 border-b bg-background/95 backdrop-blur-sm z-10">
+    <div className="flex h-full flex-col bg-background">
+      <header className="z-10 flex shrink-0 items-center justify-between border-b bg-background/95 px-4 py-3 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
             size="icon"
             onClick={onToggleSidebar}
-            className="lg:hidden h-9 w-9"
+            className="h-9 w-9 lg:hidden"
           >
             <Menu className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80">
                 <Bot className="h-4 w-4 text-primary-foreground" />
               </div>
               {channel?.id && agentStatus.status === "connected" && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
+                <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-background bg-green-500"></div>
               )}
             </div>
             <div>
               <h2 className="text-sm font-semibold text-foreground">
-                {channel?.data?.name || "New Writing Session"}
+                {channel?.data?.name || t("chat.newSession")}
               </h2>
-<p className="text-xs text-muted-foreground">
-  RH Writing AI • Trained by Rai Muhammad Haider
-</p>
+              <p className="text-xs text-muted-foreground">
+                {t("chat.brandSubtitle")}
+              </p>
             </div>
           </div>
         </div>
-       {channel?.id && agentStatus.status === "connected" && (
-  <div className="flex items-center gap-2">
-    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-    <span className="text-xs text-muted-foreground font-medium">
-      RH-AI v1.0 • Online
-    </span>
-  </div>
-)}
+
+        <div className="flex items-center gap-2">
+          {channel?.id && agentStatus.status === "connected" && (
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+              <span className="text-xs font-medium text-muted-foreground">
+                {t("chat.online")}
+              </span>
+            </div>
+          )}
+          <SettingsDialog />
+        </div>
       </header>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex flex-1 flex-col min-h-0">
         {!channel ? (
           <EmptyStateWithInput onNewChatMessage={onNewChatMessage} />
         ) : (

@@ -1,3 +1,10 @@
+import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useChatContext } from "stream-chat-react";
+import { Channel } from "stream-chat";
+import { Loader2 } from "lucide-react";
+import { usePreferences } from "@/contexts/preferences-context";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,14 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Channel, ChannelFilters, ChannelSort } from "stream-chat";
 import { User } from "../types/auth";
-import { useChatContext } from "stream-chat-react";
-
-import { v4 as uuidv4 } from "uuid";
 import { ChatProvider } from "../providers/chat-provider";
 import { BillingPage } from "./billing-page";
 import { ChatInterface } from "./chat-interface";
@@ -33,6 +33,7 @@ export const AuthenticatedApp = ({ user, onLogout }: AuthenticatedAppProps) => (
 );
 
 const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
+  const { t } = usePreferences();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [channelToDelete, setChannelToDelete] = useState<Channel | null>(null);
@@ -55,6 +56,7 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
         setActiveChannel(undefined);
       }
     };
+
     syncChannelWithUrl();
   }, [channelId, client, setActiveChannel]);
 
@@ -62,17 +64,14 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
     if (!user.id) return;
 
     try {
-      // 1. Create a new channel with the user as the only member
       const newChannel = client.channel("messaging", uuidv4(), {
         name: message.text.substring(0, 50),
         members: [user.id],
       });
       await newChannel.watch();
 
-      // 2. Set up event listener for when AI agent is added as member
       const memberAddedPromise = new Promise<void>((resolve) => {
         const unsubscribe = newChannel.on("member.added", (event) => {
-          // Check if the added member is the AI agent (not the current user)
           if (event.member?.user?.id && event.member.user.id !== user.id) {
             unsubscribe.unsubscribe();
             resolve();
@@ -80,7 +79,6 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
         });
       });
 
-      // 3. Connect the AI agent
       const response = await fetch(`${backendUrl}/start-ai-agent`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -94,11 +92,9 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
         throw new Error("AI agent failed to join the chat.");
       }
 
-      // 4. Set the channel as active and navigate
       setActiveChannel(newChannel);
       navigate(`/chat/${newChannel.id}`);
 
-      // 5. Wait for AI agent to be added as member, then send message
       await memberAddedPromise;
       await newChannel.sendMessage(message);
     } catch (error) {
@@ -106,17 +102,6 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
         error instanceof Error ? error.message : "Something went wrong";
       console.error("Error creating new chat:", errorMessage);
     }
-  };
-
-  const handleNewChatClick = () => {
-    setActiveChannel(undefined);
-    navigate("/");
-    setSidebarOpen(false);
-  };
-
-  const handleDeleteClick = (channel: Channel) => {
-    setChannelToDelete(channel);
-    setShowDeleteDialog(true);
   };
 
   const handleDeleteConfirm = async () => {
@@ -130,32 +115,21 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
         console.error("Error deleting channel:", error);
       }
     }
-    setShowDeleteDialog(false);
-    setChannelToDelete(null);
-  };
 
-  const handleDeleteCancel = () => {
     setShowDeleteDialog(false);
     setChannelToDelete(null);
   };
 
   if (!client) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background">
+      <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="ml-4 text-lg text-muted-foreground">
-          Connecting to chat...
+          {t("common.connectingChat")}
         </p>
       </div>
     );
   }
-
-  const filters: ChannelFilters = {
-    type: "messaging",
-    members: { $in: [user.id] },
-  };
-  const sort: ChannelSort = { last_message_at: -1 };
-  const options = { state: true, presence: true, limit: 10 };
 
   return (
     <div className="flex h-full w-full">
@@ -163,15 +137,23 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         onLogout={onLogout}
-        onNewChat={handleNewChatClick}
-        onChannelDelete={handleDeleteClick}
+        onNewChat={() => {
+          setActiveChannel(undefined);
+          navigate("/");
+          setSidebarOpen(false);
+        }}
+        onChannelDelete={(channel) => {
+          setChannelToDelete(channel);
+          setShowDeleteDialog(true);
+        }}
       />
+
       {isBillingView ? (
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           <BillingPage />
         </div>
       ) : (
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex min-w-0 flex-1 flex-col">
           <ChatInterface
             onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
             onNewChatMessage={handleNewChatMessage}
@@ -180,25 +162,23 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
         </div>
       )}
 
-      {/* Delete Chat Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Writing Session</AlertDialogTitle>
+            <AlertDialogTitle>{t("dialog.deleteTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this writing session? This action
-              cannot be undone and all content will be permanently deleted.
+              {t("dialog.deleteDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleDeleteCancel}>
-              Cancel
+            <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
+              {t("dialog.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
             >
-              Delete Session
+              {t("dialog.deleteSession")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

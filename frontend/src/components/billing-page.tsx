@@ -19,12 +19,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { usePreferences } from "@/contexts/preferences-context";
 import { useToast } from "@/hooks/use-toast";
 import {
   BillingPlan,
   BillingPlanId,
-  billingService,
   SubscriptionState,
+  billingService,
 } from "@/services/billing.service";
 
 const planIcon = {
@@ -34,6 +35,7 @@ const planIcon = {
 };
 
 export const BillingPage = () => {
+  const { t } = usePreferences();
   const [plans, setPlans] = useState<BillingPlan[]>([]);
   const [subscription, setSubscription] = useState<SubscriptionState | null>(
     null,
@@ -47,11 +49,11 @@ export const BillingPage = () => {
 
   const sessionId = searchParams.get("session_id");
   const checkoutCancelled = searchParams.get("checkout") === "cancelled";
-
   const currentPlan = subscription?.plan || "free";
-  const featuredPlan = useMemo(() => plans.find((plan) => plan.id === "plus"), [
-    plans,
-  ]);
+  const featuredPlan = useMemo(
+    () => plans.find((plan) => plan.id === "plus"),
+    [plans],
+  );
 
   useEffect(() => {
     const loadBilling = async () => {
@@ -173,21 +175,20 @@ export const BillingPage = () => {
               onClick={() => navigate("/")}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to workspace
+              {t("billing.back")}
             </Button>
             <div>
               <h1 className="text-2xl font-semibold tracking-normal">
-                Plans & Billing
+                {t("billing.title")}
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
-                Choose the right AI writing plan and manage access from one
-                place.
+                {t("billing.description")}
               </p>
             </div>
           </div>
           <div className="rounded-lg border bg-muted/30 px-4 py-3">
             <p className="text-xs font-medium uppercase text-muted-foreground">
-              Current plan
+              {t("billing.currentPlan")}
             </p>
             <p className="text-lg font-semibold capitalize">{currentPlan}</p>
           </div>
@@ -196,7 +197,7 @@ export const BillingPage = () => {
         {verifying && (
           <div className="flex items-center rounded-lg border bg-primary/5 px-4 py-3 text-sm text-primary">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Verifying Stripe checkout and activating your plan...
+            {t("billing.verifying")}
           </div>
         )}
 
@@ -222,8 +223,10 @@ export const BillingPage = () => {
                       <Icon className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex gap-2">
-                      {isFeatured && <Badge>Popular</Badge>}
-                      {isCurrent && <Badge variant="secondary">Active</Badge>}
+                      {isFeatured && <Badge>{t("billing.popular")}</Badge>}
+                      {isCurrent && (
+                        <Badge variant="secondary">{t("billing.active")}</Badge>
+                      )}
                     </div>
                   </div>
                   <div>
@@ -234,11 +237,11 @@ export const BillingPage = () => {
                   </div>
                   <div className="flex items-end gap-1">
                     <span className="text-3xl font-semibold">
-                      {plan.price === 0 ? "Free" : `$${plan.price / 100}`}
+                      {plan.price === 0 ? t("billing.free") : `$${plan.price / 100}`}
                     </span>
                     {plan.price > 0 && (
                       <span className="pb-1 text-sm text-muted-foreground">
-                        / month
+                        {t("billing.perMonth")}
                       </span>
                     )}
                   </div>
@@ -263,16 +266,16 @@ export const BillingPage = () => {
                     {isBusy ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Starting checkout...
+                        {t("billing.starting")}
                       </>
                     ) : isCurrent ? (
-                      "Current plan"
+                      t("billing.current")
                     ) : plan.price === 0 ? (
-                      "Use free plan"
+                      t("billing.useFree")
                     ) : (
                       <>
                         <CreditCard className="mr-2 h-4 w-4" />
-                        Upgrade with Stripe
+                        {t("billing.upgrade")}
                       </>
                     )}
                   </Button>
@@ -285,4 +288,3 @@ export const BillingPage = () => {
     </main>
   );
 };
-

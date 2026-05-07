@@ -1,3 +1,4 @@
+import { SettingsDialog } from "@/components/settings-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,22 +8,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { usePreferences } from "@/contexts/preferences-context";
 import { cn } from "@/lib/utils";
 import {
   CreditCard,
   LogOut,
   MessageCircle,
   MessageSquare,
-  Moon,
   PlusCircle,
-  Sun,
   Trash2,
   X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Channel, ChannelFilters, ChannelSort } from "stream-chat";
 import { ChannelList, useChatContext } from "stream-chat-react";
-import { useTheme } from "../hooks/use-theme";
 
 interface ChatSidebarProps {
   isOpen: boolean;
@@ -32,27 +31,30 @@ interface ChatSidebarProps {
   onChannelDelete: (channel: Channel) => void;
 }
 
-const ChannelListEmptyStateIndicator = () => (
-  <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
-    <div className="mb-4">
-      <div className="w-16 h-16 bg-gradient-to-br from-primary/15 via-primary/8 to-transparent rounded-2xl flex items-center justify-center shadow-sm border border-primary/10">
-        <MessageCircle className="h-8 w-8 text-primary/70" />
+const ChannelListEmptyStateIndicator = () => {
+  const { t } = usePreferences();
+
+  return (
+    <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
+      <div className="mb-4">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/15 via-primary/8 to-transparent shadow-sm">
+          <MessageCircle className="h-8 w-8 text-primary/70" />
+        </div>
+      </div>
+      <div className="max-w-xs space-y-2">
+        <h3 className="text-sm font-medium text-foreground">
+          {t("chat.noSessionsTitle")}
+        </h3>
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          {t("chat.noSessionsDescription")}
+        </p>
+      </div>
+      <div className="mt-4 flex items-center gap-1 text-xs text-muted-foreground/60">
+        <span>{t("chat.noSessionsHint")}</span>
       </div>
     </div>
-    <div className="space-y-2 max-w-xs">
-      <h3 className="text-sm font-medium text-foreground">
-        No writing sessions yet
-      </h3>
-      <p className="text-xs text-muted-foreground leading-relaxed">
-        Start a new writing session to begin creating content with your AI
-        assistant.
-      </p>
-    </div>
-    <div className="mt-4 flex items-center gap-1 text-xs text-muted-foreground/60">
-      <span>Click "New Writing Session" to get started</span>
-    </div>
-  </div>
-);
+  );
+};
 
 export const ChatSidebar = ({
   isOpen,
@@ -62,8 +64,8 @@ export const ChatSidebar = ({
   onChannelDelete,
 }: ChatSidebarProps) => {
   const { client, setActiveChannel } = useChatContext();
+  const { t } = usePreferences();
   const { user } = client;
-  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   if (!user) return null;
@@ -77,37 +79,36 @@ export const ChatSidebar = ({
 
   return (
     <>
-      {/* Backdrop for mobile */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
           onClick={onClose}
         />
       )}
 
-      {/* The Sidebar */}
       <div
         className={cn(
-          "fixed lg:static inset-y-0 left-0 z-50 w-80 bg-background border-r flex flex-col transform transition-transform duration-300 ease-in-out",
-          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          "fixed inset-y-0 left-0 z-50 flex w-80 transform flex-col border-r bg-background transition-transform duration-300 ease-in-out lg:static",
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
-        {/* Header */}
-        <div className="p-4 border-b flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Writing Sessions</h2>
+        <div className="flex items-center justify-between border-b p-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold">{t("chat.sessions")}</h2>
+            <SettingsDialog />
+          </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="lg:hidden h-8 w-8"
+            className="h-8 w-8 lg:hidden"
           >
             <X className="h-4 w-4" />
           </Button>
         </div>
 
-        {/* Channel List */}
         <ScrollArea className="flex-1">
-          <div className="p-4 space-y-0">
+          <div className="space-y-0 p-4">
             <ChannelList
               filters={filters}
               sort={sort}
@@ -116,10 +117,10 @@ export const ChatSidebar = ({
               Preview={(previewProps) => (
                 <div
                   className={cn(
-                    "flex items-center p-2 rounded-lg cursor-pointer transition-colors relative group mb-1",
+                    "group relative mb-1 flex cursor-pointer items-center rounded-lg p-2 transition-colors",
                     previewProps.active
                       ? "bg-primary/20 text-primary-foreground"
-                      : "hover:bg-muted/50"
+                      : "hover:bg-muted/50",
                   )}
                   onClick={() => {
                     setActiveChannel(previewProps.channel);
@@ -127,19 +128,19 @@ export const ChatSidebar = ({
                     onClose();
                   }}
                 >
-                  <MessageSquare className="h-4 w-4 mr-2" />
+                  <MessageSquare className="mr-2 h-4 w-4" />
                   <span className="flex-1 truncate text-sm font-medium">
-                    {previewProps.channel.data?.name || "New Writing Session"}
+                    {previewProps.channel.data?.name || t("chat.newSession")}
                   </span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute right-1 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    className="absolute right-1 z-10 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
                     onClick={async (e) => {
                       e.stopPropagation();
                       onChannelDelete(previewProps.channel);
                     }}
-                    title="Delete writing session"
+                    title={t("dialog.deleteTitle")}
                   >
                     <Trash2 className="h-4 w-4 text-muted-foreground/70 hover:text-destructive" />
                   </Button>
@@ -149,54 +150,40 @@ export const ChatSidebar = ({
           </div>
         </ScrollArea>
 
-        {/* New Chat Button */}
-        <div className="p-2 border-t">
+        <div className="border-t p-2">
           <Button onClick={onNewChat} className="w-full justify-start">
             <PlusCircle className="mr-2 h-4 w-4" />
-            New Writing Session
+            {t("chat.newSession")}
           </Button>
         </div>
 
-        {/* User Profile / Logout */}
-        <div className="p-2 border-t bg-background">
+        <div className="border-t bg-background p-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-full justify-start items-center p-2 h-auto"
+                className="h-auto w-full items-center justify-start p-2"
               >
-                <Avatar className="w-8 h-8 mr-2">
-                  <AvatarImage src={user?.image} alt={user?.name} />
-                  <AvatarFallback>
-                    {user?.name?.charAt(0) || "U"}
-                  </AvatarFallback>
+                <Avatar className="mr-2 h-8 w-8">
+                  <AvatarImage src={user.image} alt={user.name} />
+                  <AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 text-left">
-                  <p className="font-semibold text-sm truncate">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground">Online</p>
+                  <p className="truncate text-sm font-semibold">{user.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("common.online")}
+                  </p>
                 </div>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-72" align="end">
-              <DropdownMenuItem
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              >
-                {theme === "dark" ? (
-                  <Sun className="mr-2 h-4 w-4" />
-                ) : (
-                  <Moon className="mr-2 h-4 w-4" />
-                )}
-                <span>
-                  Switch to {theme === "dark" ? "Light" : "Dark"} Theme
-                </span>
-              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/billing")}>
                 <CreditCard className="mr-2 h-4 w-4" />
-                <span>Plans & Billing</span>
+                <span>{t("billing.title")}</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>{t("auth.logout")}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

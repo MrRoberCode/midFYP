@@ -2,6 +2,7 @@ import { AuthenticatedApp } from "@/components/authenticated-app";
 import { Login } from "@/components/login";
 import { Signup } from "@/components/signup";
 import { Toaster } from "@/components/ui/toaster";
+import { PreferencesProvider } from "@/contexts/preferences-context";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { useState } from "react";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -32,9 +33,11 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <PreferencesProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </PreferencesProvider>
     </ThemeProvider>
   );
 }

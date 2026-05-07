@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Bot, Loader2 } from "lucide-react";
+import { usePreferences } from "@/contexts/preferences-context";
 import { Button } from "./ui/button";
 import {
   Card,
@@ -19,6 +20,7 @@ interface SignupProps {
 }
 
 export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
+  const { t } = usePreferences();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,11 +43,11 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
       console.error("Signup error details:", error.response?.data);
       const errorData = error.response?.data;
       let description = "Signup failed. Please try again.";
-      
+
       if (errorData) {
         if (Array.isArray(errorData.message)) {
           description = errorData.message.join(", ");
-        } else if (typeof errorData.message === 'string') {
+        } else if (typeof errorData.message === "string") {
           description = errorData.message;
         } else if (errorData.error) {
           description = errorData.error;
@@ -67,21 +69,21 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
   return (
     <div className="flex h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-2">
-          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mx-auto">
+        <CardHeader className="space-y-2 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
             <Bot className="h-6 w-6 text-primary-foreground" />
           </div>
           <CardTitle className="text-xl font-semibold">
-            Create an Account
+            {t("auth.createAccount")}
           </CardTitle>
           <CardDescription className="text-sm text-muted-foreground">
-            Join AI Assistant to start chatting.
+            {t("auth.createAccountDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t("auth.name")}</Label>
               <Input
                 id="name"
                 placeholder="John Doe"
@@ -91,7 +93,7 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.email")}</Label>
               <Input
                 id="email"
                 type="email"
@@ -102,11 +104,11 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("auth.password")}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder={t("auth.password")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -116,22 +118,22 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating account...
+                  {t("auth.creatingAccount")}
                 </>
               ) : (
-                "Sign Up"
+                t("auth.signUp")
               )}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-muted-foreground">
-            Already have an account?{" "}
+            {t("auth.alreadyAccount")}{" "}
             <button
               onClick={onSwitchToLogin}
-              className="text-primary hover:underline font-medium"
+              className="font-medium text-primary hover:underline"
             >
-              Log in
+              {t("auth.logIn")}
             </button>
           </div>
         </CardFooter>
