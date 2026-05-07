@@ -20,11 +20,13 @@ export interface AuthResponse {
 export interface LoginStartResponse {
   success: boolean;
   message: string;
+  expiresInSeconds?: number;
 }
 
 export interface MessageResponse {
   success: boolean;
   message: string;
+  expiresInSeconds?: number;
 }
 
 export interface AuthError {

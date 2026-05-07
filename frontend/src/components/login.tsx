@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ArrowLeft, Bot, Loader2, MailCheck, ShieldCheck } from "lucide-react";
 import { usePreferences } from "@/contexts/preferences-context";
 import { Button } from "./ui/button";
@@ -29,12 +29,15 @@ type AuthStep =
 
 export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
   const { t } = usePreferences();
+  const defaultOtpDuration = 120;
   const [step, setStep] = useState<AuthStep>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [otpExpiresAt, setOtpExpiresAt] = useState<number | null>(null);
+  const [secondsLeft, setSecondsLeft] = useState(0);
   const {
     login,
     verifyLoginOtp,
@@ -45,6 +48,46 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
   const { toast } = useToast();
 
   const isOtpStep = step === "loginOtp" || step === "forgotOtp";
+  const isOtpExpired = isOtpStep && secondsLeft === 0;
+
+  useEffect(() => {
+    if (!otpExpiresAt) {
+      setSecondsLeft(0);
+      return;
+    }
+
+    const updateCountdown = () => {
+      setSecondsLeft(Math.max(0, Math.ceil((otpExpiresAt - Date.now()) / 1000)));
+    };
+
+    updateCountdown();
+
+    const interval = window.setInterval(() => {
+      const remainingSeconds = Math.max(
+        0,
+        Math.ceil((otpExpiresAt - Date.now()) / 1000),
+      );
+      setSecondsLeft(remainingSeconds);
+
+      if (remainingSeconds === 0) {
+        window.clearInterval(interval);
+      }
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [otpExpiresAt]);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
+  };
+
+  const startOtpTimer = (durationSeconds?: number) => {
+    const expiresIn = durationSeconds ?? defaultOtpDuration;
+    setOtpExpiresAt(Date.now() + expiresIn * 1000);
+    setSecondsLeft(expiresIn);
+  };
 
   const getErrorDescription = (error: any, fallback: string) => {
     const errorData = error.response?.data;
@@ -65,19 +108,21 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
     try {
       if (step === "login") {
         if (!email || !password) return;
-        await login(email, password);
+        const expiresInSeconds = await login(email, password);
         setOtp("");
+        startOtpTimer(expiresInSeconds);
         setStep("loginOtp");
       } else if (step === "loginOtp") {
-        if (otp.length !== 6) return;
+        if (otp.length !== 6 || isOtpExpired) return;
         await verifyLoginOtp(otp);
       } else if (step === "forgotEmail") {
         if (!email) return;
-        await forgotPassword(email);
+        const expiresInSeconds = await forgotPassword(email);
         setOtp("");
+        startOtpTimer(expiresInSeconds);
         setStep("forgotOtp");
       } else if (step === "forgotOtp") {
-        if (otp.length !== 6) return;
+        if (otp.length !== 6 || isOtpExpired) return;
         await verifyResetOtp(otp);
         setStep("resetPassword");
       } else {
@@ -132,6 +177,33 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
     },
   }[step];
 
+  const handleResendOtp = async () => {
+    if (!email) return;
+
+    setIsSubmitting(true);
+    try {
+      const expiresInSeconds =
+        step === "loginOtp" ? await login(email, password) : await forgotPassword(email);
+      setOtp("");
+      startOtpTimer(expiresInSeconds);
+      toast({
+        title: "OTP sent",
+        description: "A fresh verification code has been sent to your email.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Resend Failed",
+        description: getErrorDescription(
+          error,
+          "We could not send a new OTP right now.",
+        ),
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
@@ -183,7 +255,7 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
             )}
 
             {isOtpStep && (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label htmlFor="otp">{t("auth.otp")}</Label>
                 <InputOTP
                   id="otp"
@@ -191,6 +263,7 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
                   value={otp}
                   onChange={setOtp}
                   containerClassName="justify-center"
+                  disabled={isOtpExpired}
                 >
                   <InputOTPGroup>
                     {Array.from({ length: 6 }).map((_, index) => (
@@ -198,6 +271,37 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
                     ))}
                   </InputOTPGroup>
                 </InputOTP>
+                <div className="rounded-xl border border-border/70 bg-muted/30 px-4 py-3">
+                  <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary/80">
+                    OTP Timer
+                  </p>
+                  <div className="mt-2 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">
+                        {isOtpExpired
+                          ? "This code has expired"
+                          : `Code expires in ${formatTime(secondsLeft)}`}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {isOtpExpired
+                          ? "Request a new OTP to continue."
+                          : "Enter the code before the countdown ends."}
+                      </p>
+                    </div>
+                    <div className="rounded-full bg-background px-3 py-1 text-sm font-semibold text-primary shadow-sm">
+                      {formatTime(secondsLeft)}
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleResendOtp}
+                  disabled={isSubmitting || (step === "loginOtp" && !password)}
+                >
+                  Resend OTP
+                </Button>
               </div>
             )}
 
@@ -215,7 +319,11 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
               </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmitting || (isOtpStep && isOtpExpired)}
+            >
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -235,6 +343,7 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
                   setStep("forgotEmail");
                   setPassword("");
                   setOtp("");
+                  setOtpExpiresAt(null);
                 }}
                 className="text-sm font-medium text-primary hover:underline"
               >
@@ -256,6 +365,7 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
                 setStep("login");
                 setOtp("");
                 setNewPassword("");
+                setOtpExpiresAt(null);
               }}
               className="inline-flex items-center text-sm font-medium text-primary hover:underline"
             >

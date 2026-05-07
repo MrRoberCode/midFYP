@@ -6,9 +6,9 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<number | undefined>;
   verifyLoginOtp: (otp: string) => Promise<void>;
-  forgotPassword: (email: string) => Promise<void>;
+  forgotPassword: (email: string) => Promise<number | undefined>;
   verifyResetOtp: (otp: string) => Promise<void>;
   resetPassword: (otp: string, newPassword: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
@@ -46,6 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!response.success) {
       throw new Error(response.message || 'Login failed');
     }
+    return response.expiresInSeconds;
   };
 
   const verifyLoginOtp = async (otp: string) => {
@@ -63,6 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!response.success) {
       throw new Error(response.message || 'Failed to send reset OTP');
     }
+    return response.expiresInSeconds;
   };
 
   const verifyResetOtp = async (otp: string) => {

@@ -18,6 +18,9 @@ import {
 import * as bcrypt from 'bcrypt';
 import { EmailService } from './email.service';
 
+const OTP_EXPIRY_MINUTES = 2;
+const OTP_EXPIRY_MS = OTP_EXPIRY_MINUTES * 60 * 1000;
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -89,13 +92,14 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
     const otp = this.generateOtp();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+    const otpExpiry = new Date(Date.now() + OTP_EXPIRY_MS);
     await this.userService.updateUser(user._id.toString(), { otp, otpExpiry });
-    await this.emailService.sendOTP(user.email, otp);
+    await this.emailService.sendOTP(user.email, otp, OTP_EXPIRY_MINUTES);
 
     return {
       success: true,
       message: 'OTP sent to your email. Please verify to complete login.',
+      expiresInSeconds: OTP_EXPIRY_MINUTES * 60,
     };
   }
 
@@ -156,17 +160,22 @@ export class AuthService {
     }
 
     const resetOtp = this.generateOtp();
-    const resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+    const resetOtpExpiry = new Date(Date.now() + OTP_EXPIRY_MS);
 
     await this.userService.updateUserByEmail(forgotPasswordDto.email, {
       resetOtp,
       resetOtpExpiry,
     });
-    await this.emailService.sendResetOTP(user.email, resetOtp);
+    await this.emailService.sendResetOTP(
+      user.email,
+      resetOtp,
+      OTP_EXPIRY_MINUTES,
+    );
 
     return {
       success: true,
       message: 'Reset OTP sent to your email.',
+      expiresInSeconds: OTP_EXPIRY_MINUTES * 60,
     };
   }
 
