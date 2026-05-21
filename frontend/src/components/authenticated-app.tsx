@@ -20,6 +20,7 @@ import { ChatProvider } from "../providers/chat-provider";
 import { BillingPage } from "./billing-page";
 import { ChatInterface } from "./chat-interface";
 import { ChatSidebar } from "./chat-sidebar";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthenticatedAppProps {
   user: User;
@@ -34,6 +35,7 @@ export const AuthenticatedApp = ({ user, onLogout }: AuthenticatedAppProps) => (
 
 const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
   const { t } = usePreferences();
+  const { toast } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [channelToDelete, setChannelToDelete] = useState<Channel | null>(null);
@@ -89,7 +91,7 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
       });
 
       if (!response.ok) {
-        throw new Error("AI agent failed to join the chat.");
+        throw new Error(t("chat.newSessionError"));
       }
 
       setActiveChannel(newChannel);
@@ -99,8 +101,13 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
       await newChannel.sendMessage(message);
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Something went wrong";
+        error instanceof Error ? error.message : t("auth.genericError");
       console.error("Error creating new chat:", errorMessage);
+      toast({
+        variant: "destructive",
+        title: t("chat.newSession"),
+        description: errorMessage,
+      });
     }
   };
 

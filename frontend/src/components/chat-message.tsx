@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Bot, Check, Copy, FileText } from "lucide-react";
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { usePreferences } from "@/contexts/preferences-context";
 import {
   useAIState,
   useChannelStateContext,
@@ -12,6 +13,7 @@ import {
 } from "stream-chat-react";
 
 const ChatMessage: React.FC = () => {
+  const { t } = usePreferences();
   const { message } = useMessageContext();
   const { channel } = useChannelStateContext();
   const { aiState } = useAIState(channel);
@@ -37,13 +39,13 @@ const ChatMessage: React.FC = () => {
   const getAiStateMessage = () => {
     switch (aiState) {
       case "AI_STATE_THINKING":
-        return "Thinking...";
+        return t("chat.aiThinking");
       case "AI_STATE_GENERATING":
-        return "Generating response...";
+        return t("chat.aiGenerating");
       case "AI_STATE_EXTERNAL_SOURCES":
-        return "Accessing external sources...";
+        return t("chat.aiExternalSources");
       case "AI_STATE_ERROR":
-        return "An error occurred.";
+        return t("chat.aiError");
       default:
         return null;
     }
@@ -100,7 +102,7 @@ const ChatMessage: React.FC = () => {
                       <img
                         key={attachment.id || index}
                         src={attachment.image_url}
-                        alt={attachment.title || "Uploaded image"}
+                        alt={attachment.title || t("chat.uploadedImage")}
                         className="max-h-60 w-full rounded-xl object-cover border border-border/50"
                       />
                     );
@@ -114,10 +116,10 @@ const ChatMessage: React.FC = () => {
                       <FileText className="h-5 w-5 shrink-0 text-muted-foreground" />
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium">
-                          {attachment.title || "Attachment"}
+                          {attachment.title || t("chat.attachment")}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {attachment.mime_type || attachment.type || "File"}
+                          {attachment.mime_type || attachment.type || t("chat.file")}
                         </p>
                       </div>
                     </div>
@@ -227,12 +229,12 @@ const ChatMessage: React.FC = () => {
                   {copied ? (
                     <>
                       <Check className="h-3 w-3 mr-1 text-green-600" />
-                      <span className="text-green-600">Copied</span>
+                      <span className="text-green-600">{t("chat.copied")}</span>
                     </>
                   ) : (
                     <>
                       <Copy className="h-3 w-3 mr-1" />
-                      <span>Copy</span>
+                      <span>{t("chat.copy")}</span>
                     </>
                   )}
                 </Button>

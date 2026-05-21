@@ -418,7 +418,7 @@ async function disposeAiAgent(aiAgent: AIAgent) {
   await serverClient.deleteUser(aiAgent.user.id, { hard_delete: true });
 }
 
-const port = process.env.PORT || 3333;
+const port = process.env.PORT || 333333;
 app.listen(port, () => {
   console.log(`\n🚀 AI Writing Assistant Server v2.0`);
   console.log(`📍 Running on http://localhost:${port}`);

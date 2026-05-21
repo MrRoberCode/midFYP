@@ -15,6 +15,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
 import { Label } from "./ui/label";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../hooks/use-toast";
+import { LanguageSelector } from "./language-selector";
 
 interface LoginProps {
   onSwitchToSignup: () => void;
@@ -133,10 +134,10 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
       console.error("Authentication error details:", error.response?.data);
       toast({
         variant: "destructive",
-        title: "Authentication Failed",
+        title: t("auth.authenticationFailed"),
         description: getErrorDescription(
           error,
-          "Something went wrong. Please try again.",
+          t("auth.genericError"),
         ),
       });
     } finally {
@@ -187,16 +188,16 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
       setOtp("");
       startOtpTimer(expiresInSeconds);
       toast({
-        title: "OTP sent",
-        description: "A fresh verification code has been sent to your email.",
+        title: t("auth.otpSent"),
+        description: t("auth.otpSentDescription"),
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Resend Failed",
+        title: t("auth.resendFailed"),
         description: getErrorDescription(
           error,
-          "We could not send a new OTP right now.",
+          t("auth.resendFailedDescription"),
         ),
       });
     } finally {
@@ -206,6 +207,9 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
 
   return (
     <div className="flex h-screen items-center justify-center bg-background p-4">
+      <div className="absolute left-4 top-4">
+        <LanguageSelector />
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
@@ -232,7 +236,7 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="name@example.com"
+                  placeholder={t("auth.emailPlaceholder")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -273,19 +277,21 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
                 </InputOTP>
                 <div className="rounded-xl border border-border/70 bg-muted/30 px-4 py-3">
                   <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary/80">
-                    OTP Timer
+                    {t("auth.otpTimer")}
                   </p>
                   <div className="mt-2 flex items-center justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-foreground">
                         {isOtpExpired
-                          ? "This code has expired"
-                          : `Code expires in ${formatTime(secondsLeft)}`}
+                          ? t("auth.codeExpired")
+                          : t("auth.codeExpiresIn", {
+                              time: formatTime(secondsLeft),
+                            })}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {isOtpExpired
-                          ? "Request a new OTP to continue."
-                          : "Enter the code before the countdown ends."}
+                          ? t("auth.requestNewOtp")
+                          : t("auth.enterCodeBeforeCountdown")}
                       </p>
                     </div>
                     <div className="rounded-full bg-background px-3 py-1 text-sm font-semibold text-primary shadow-sm">
@@ -300,7 +306,7 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
                   onClick={handleResendOtp}
                   disabled={isSubmitting || (step === "loginOtp" && !password)}
                 >
-                  Resend OTP
+                  {t("auth.resendOtp")}
                 </Button>
               </div>
             )}

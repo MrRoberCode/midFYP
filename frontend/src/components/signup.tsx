@@ -14,6 +14,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../hooks/use-toast";
+import { LanguageSelector } from "./language-selector";
 
 interface SignupProps {
   onSwitchToLogin: () => void;
@@ -36,13 +37,13 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
     try {
       await signup(name, email, password);
       toast({
-        title: "Success",
-        description: "Account created successfully!",
+        title: t("auth.success"),
+        description: t("auth.accountCreated"),
       });
     } catch (error: any) {
       console.error("Signup error details:", error.response?.data);
       const errorData = error.response?.data;
-      let description = "Signup failed. Please try again.";
+      let description = t("auth.signupFailedDescription");
 
       if (errorData) {
         if (Array.isArray(errorData.message)) {
@@ -58,7 +59,7 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
 
       toast({
         variant: "destructive",
-        title: "Signup Failed",
+        title: t("auth.signupFailed"),
         description,
       });
     } finally {
@@ -68,6 +69,9 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
 
   return (
     <div className="flex h-screen items-center justify-center bg-background p-4">
+      <div className="absolute left-4 top-4">
+        <LanguageSelector />
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
@@ -86,7 +90,7 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
               <Label htmlFor="name">{t("auth.name")}</Label>
               <Input
                 id="name"
-                placeholder="John Doe"
+                placeholder={t("auth.namePlaceholder")}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -97,7 +101,7 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
               <Input
                 id="email"
                 type="email"
-                placeholder="name@example.com"
+                placeholder={t("auth.emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

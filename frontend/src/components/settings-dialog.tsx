@@ -38,7 +38,7 @@ export const SettingsDialog = () => {
           <span className="sr-only">{t("settings.title")}</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl" dir="ltr">
         <DialogHeader>
           <DialogTitle>{t("settings.title")}</DialogTitle>
           <DialogDescription>{t("settings.description")}</DialogDescription>

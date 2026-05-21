@@ -34,6 +34,12 @@ const planIcon = {
   pro: ShieldCheck,
 };
 
+const featureCount: Record<BillingPlanId, number> = {
+  free: 3,
+  plus: 4,
+  pro: 4,
+};
+
 export const BillingPage = () => {
   const { t } = usePreferences();
   const [plans, setPlans] = useState<BillingPlan[]>([]);
@@ -67,9 +73,9 @@ export const BillingPage = () => {
       } catch (error: any) {
         toast({
           variant: "destructive",
-          title: "Billing unavailable",
+          title: t("billing.unavailable"),
           description:
-            error.response?.data?.message || "Could not load billing plans.",
+            error.response?.data?.message || t("billing.unavailableDescription"),
         });
       } finally {
         setLoading(false);
@@ -83,8 +89,8 @@ export const BillingPage = () => {
     if (!checkoutCancelled) return;
 
     toast({
-      title: "Checkout cancelled",
-      description: "No payment was taken. Your current plan is unchanged.",
+      title: t("billing.checkoutCancelled"),
+      description: t("billing.checkoutCancelledDescription"),
     });
     setSearchParams({});
   }, [checkoutCancelled, setSearchParams, toast]);
@@ -103,17 +109,17 @@ export const BillingPage = () => {
           stripeSubscriptionId: null,
         });
         toast({
-          title: "Plan activated",
+          title: t("billing.planActivated"),
           description: response.message,
         });
         setSearchParams({});
       } catch (error: any) {
         toast({
           variant: "destructive",
-          title: "Checkout verification failed",
+          title: t("billing.checkoutVerificationFailed"),
           description:
             error.response?.data?.message ||
-            "Payment completed, but plan verification failed.",
+            t("billing.checkoutVerificationFailedDescription"),
         });
       } finally {
         setVerifying(false);
@@ -140,16 +146,16 @@ export const BillingPage = () => {
         stripeSubscriptionId: previous?.stripeSubscriptionId || null,
       }));
       toast({
-        title: "Plan updated",
-        description: response.message || "Your plan has been updated.",
+        title: t("billing.planUpdated"),
+        description: response.message || t("billing.planUpdatedDescription"),
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Checkout failed",
+        title: t("billing.checkoutFailed"),
         description:
           error.response?.data?.message ||
-          "Could not start Stripe checkout. Please try again.",
+          t("billing.checkoutFailedDescription"),
       });
     } finally {
       setCheckoutPlan(null);
@@ -190,7 +196,9 @@ export const BillingPage = () => {
             <p className="text-xs font-medium uppercase text-muted-foreground">
               {t("billing.currentPlan")}
             </p>
-            <p className="text-lg font-semibold capitalize">{currentPlan}</p>
+            <p className="text-lg font-semibold">
+              {t(`billing.plan.${currentPlan}`)}
+            </p>
           </div>
         </div>
 
@@ -230,9 +238,9 @@ export const BillingPage = () => {
                     </div>
                   </div>
                   <div>
-                    <CardTitle>{plan.name}</CardTitle>
+                    <CardTitle>{t(`billing.plan.${plan.id}`)}</CardTitle>
                     <CardDescription className="mt-2">
-                      {plan.description}
+                      {t(`billing.plan.${plan.id}.description`)}
                     </CardDescription>
                   </div>
                   <div className="flex items-end gap-1">
@@ -248,10 +256,11 @@ export const BillingPage = () => {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex gap-2 text-sm">
+                    {Array.from({ length: featureCount[plan.id] }).map(
+                      (_, index) => (
+                      <li key={`${plan.id}-${index}`} className="flex gap-2 text-sm">
                         <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                        <span>{feature}</span>
+                        <span>{t(`billing.feature.${plan.id}.${index + 1}`)}</span>
                       </li>
                     ))}
                   </ul>

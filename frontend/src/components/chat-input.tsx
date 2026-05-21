@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { ArrowRight, FileText, ImageIcon, Loader2, Square, X } from "lucide-react";
+import { ArrowRight, FileText, Loader2, Square, X } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 // import { FileUploadButton } from "./file-upload-button";
 import { FileUploadButton } from "./fileUploadButton";
 import { WritingPromptsToolbar } from "./writing-prompts-toolbar";
+import { usePreferences } from "@/contexts/preferences-context";
 
 export interface ChatInputProps {
   className?: string;
@@ -45,6 +46,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   channelId,
   backendUrl,
 }) => {
+  const { t } = usePreferences();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
   const internalTextareaRef = useRef<HTMLTextAreaElement>(null);
@@ -85,7 +87,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setIsLoading(true);
     try {
       if (selectedFile && channelId && backendUrl) {
-        const messageText = value.trim() || `Analyze this ${selectedFile.mimeType.startsWith("image/") ? "image" : "file"}`;
+        const messageText =
+          value.trim() ||
+          (selectedFile.mimeType.startsWith("image/")
+            ? t("chat.analyzeImage")
+            : t("chat.analyzeFile"));
         const attachment = selectedFile.mimeType.startsWith("image/")
           ? {
               type: "image",
@@ -123,7 +129,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
         if (!response.ok) {
           const err = await response.json();
-          throw new Error(err.reason || "File analysis failed");
+          throw new Error(err.reason || t("chat.fileAnalysisFailed"));
         }
         handleRemoveFile();
         onValueChange("");
@@ -180,7 +186,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium truncate">{selectedFile.fileName}</p>
               <p className="text-xs text-muted-foreground">
-                {selectedFile.mimeType === "application/pdf" ? "PDF" : "Image"}
+                {selectedFile.mimeType === "application/pdf"
+                  ? t("chat.fileTypePdf")
+                  : t("chat.fileTypeImage")}
               </p>
             </div>
             <Button
@@ -204,7 +212,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             onKeyDown={handleKeyDown}
             placeholder={
               selectedFile
-                ? "Ask something about this file... (or press Enter to analyze)"
+                ? t("chat.askAboutFile")
                 : placeholder
             }
             className={cn(

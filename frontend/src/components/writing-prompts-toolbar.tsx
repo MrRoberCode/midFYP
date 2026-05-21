@@ -13,60 +13,61 @@ import {
   Type,
 } from "lucide-react";
 import React, { useState } from "react";
+import { usePreferences } from "@/contexts/preferences-context";
 
 interface WritingPromptsToolbarProps {
   onPromptSelect: (prompt: string) => void;
   className?: string;
 }
 
-const toolbarPrompts = [
-  {
-    icon: SpellCheck,
-    text: "Fix grammar & spelling",
-    category: "Editing",
-  },
-  {
-    icon: Minimize2,
-    text: "Make this more concise",
-    category: "Refinement",
-  },
-  {
-    icon: Briefcase,
-    text: "Write this more professionally",
-    category: "Tone",
-  },
-  {
-    icon: Smile,
-    text: "Make it sound more human",
-    category: "Style",
-  },
-  {
-    icon: List,
-    text: "Summarize the key points",
-    category: "Summary",
-  },
-  {
-    icon: PenLine,
-    text: "Continue writing from here",
-    category: "Generation",
-  },
-  {
-    icon: Type,
-    text: "Suggest a title for this",
-    category: "Ideas",
-  },
-  {
-    icon: Palette,
-    text: "Change the tone to be more...",
-    category: "Tone",
-  },
-];
-
 export const WritingPromptsToolbar: React.FC<WritingPromptsToolbarProps> = ({
   onPromptSelect,
   className = "",
 }) => {
+  const { t } = usePreferences();
   const [isExpanded, setIsExpanded] = useState(false);
+  const toolbarPrompts = [
+    {
+      icon: SpellCheck,
+      text: t("prompt.fixGrammar"),
+      category: t("prompt.category.editing"),
+    },
+    {
+      icon: Minimize2,
+      text: t("prompt.moreConcise"),
+      category: t("prompt.category.refinement"),
+    },
+    {
+      icon: Briefcase,
+      text: t("prompt.moreProfessional"),
+      category: t("prompt.category.tone"),
+    },
+    {
+      icon: Smile,
+      text: t("prompt.moreHuman"),
+      category: t("prompt.category.style"),
+    },
+    {
+      icon: List,
+      text: t("prompt.summarizeKeyPoints"),
+      category: t("prompt.category.summary"),
+    },
+    {
+      icon: PenLine,
+      text: t("prompt.continueWriting"),
+      category: t("prompt.category.generation"),
+    },
+    {
+      icon: Type,
+      text: t("prompt.suggestTitle"),
+      category: t("prompt.category.ideas"),
+    },
+    {
+      icon: Palette,
+      text: t("prompt.changeTone"),
+      category: t("prompt.category.tone"),
+    },
+  ];
 
   return (
     <div className={`relative ${className}`}>
@@ -128,7 +129,7 @@ export const WritingPromptsToolbar: React.FC<WritingPromptsToolbarProps> = ({
             ) : (
               <ChevronUp className="h-4 w-4 mr-1" />
             )}
-            Prompts
+            {t("prompt.toolbar")}
           </Button>
 
           <ScrollArea className="flex-1 max-w-full">

@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { FileText, ImageIcon, Loader2, Paperclip, X } from "lucide-react";
-import React, { useRef, useState } from "react";
+import { Paperclip } from "lucide-react";
+import React, { useRef } from "react";
+import { usePreferences } from "@/contexts/preferences-context";
 
 interface FileUploadButtonProps {
   onFileSelect: (file: { base64: string; mimeType: string; fileName: string; previewUrl?: string }) => void;
@@ -12,6 +13,7 @@ export const FileUploadButton: React.FC<FileUploadButtonProps> = ({
   onFileSelect,
   className,
 }) => {
+  const { t } = usePreferences();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const SUPPORTED_TYPES = [
@@ -29,12 +31,12 @@ export const FileUploadButton: React.FC<FileUploadButtonProps> = ({
     if (!file) return;
 
     if (!SUPPORTED_TYPES.includes(file.type)) {
-      alert("Only PDF, JPEG, PNG, GIF, WebP supported");
+      alert(t("chat.invalidFileType"));
       return;
     }
 
     if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      alert(`File too large. Max ${MAX_SIZE_MB}MB`);
+      alert(t("chat.maxFileSize", { size: String(MAX_SIZE_MB) }));
       return;
     }
 
@@ -80,7 +82,7 @@ export const FileUploadButton: React.FC<FileUploadButtonProps> = ({
         size="icon"
         onClick={() => fileInputRef.current?.click()}
         className="h-8 w-8 rounded-md text-muted-foreground hover:text-foreground"
-        title="Upload PDF or Image"
+        title={t("chat.uploadPdfOrImage")}
       >
         <Paperclip className="h-4 w-4" />
       </Button>

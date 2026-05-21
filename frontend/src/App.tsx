@@ -17,7 +17,7 @@ function AppContent() {
   }
 
   return (
-    <div className="h-screen bg-background">
+    <div className="h-screen bg-background" dir="ltr">
       {user ? (
         <AuthenticatedApp user={user} onLogout={logout} />
       ) : isLoginView ? (

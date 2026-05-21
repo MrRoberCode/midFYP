@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import { supplementalTranslations } from "./translation-supplements";
 
 export const supportedLanguages = [
   { value: "en", label: "English" },
@@ -1203,8 +1204,6 @@ const PreferencesContext = createContext<PreferencesContextValue | null>(null);
 
 const LANGUAGE_STORAGE_KEY = "rh-language";
 const IMPROVE_MODEL_STORAGE_KEY = "rh-improve-model";
-const rtlLanguages = new Set<SupportedLanguage>(["ur", "ar"]);
-
 export const PreferencesProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguage] = useState<SupportedLanguage>(() => {
     const stored = localStorage.getItem(
@@ -1224,7 +1223,8 @@ export const PreferencesProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
     document.documentElement.lang = language;
-    document.documentElement.dir = rtlLanguages.has(language) ? "rtl" : "ltr";
+    document.documentElement.dir = "ltr";
+    document.body.dir = "ltr";
   }, [language]);
 
   useEffect(() => {
@@ -1241,7 +1241,12 @@ export const PreferencesProvider = ({ children }: { children: ReactNode }) => {
       improveModelForEveryone,
       setImproveModelForEveryone,
       t: (key, vars) => {
-        const raw = translations[language]?.[key] ?? en[key] ?? key;
+        const raw =
+          supplementalTranslations[language]?.[key] ??
+          translations[language]?.[key] ??
+          supplementalTranslations.en[key] ??
+          en[key] ??
+          key;
 
         if (!vars) {
           return raw;
@@ -1249,7 +1254,7 @@ export const PreferencesProvider = ({ children }: { children: ReactNode }) => {
 
         return Object.entries(vars).reduce(
           (message, [name, replacement]) =>
-            message.replaceAll(`{{${name}}}`, replacement),
+            message.split(`{{${name}}}`).join(replacement),
           raw,
         );
       },
