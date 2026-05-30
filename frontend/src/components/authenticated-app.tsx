@@ -139,7 +139,7 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
   }
 
   return (
-    <div className="flex h-full w-full">
+    <div className="flex h-full w-full overflow-hidden bg-background p-0 lg:p-3">
       <ChatSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -156,11 +156,11 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
       />
 
       {isBillingView ? (
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 overflow-hidden lg:rounded-lg lg:border lg:border-border/60 lg:bg-card/40">
           <BillingPage />
         </div>
       ) : (
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden lg:rounded-lg lg:border lg:border-border/60 lg:bg-card/40">
           <ChatInterface
             onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
             onNewChatMessage={handleNewChatMessage}

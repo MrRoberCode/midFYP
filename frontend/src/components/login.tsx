@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { ArrowLeft, Bot, Loader2, MailCheck, ShieldCheck } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Bot,
+  CheckCircle2,
+  Loader2,
+  MailCheck,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import { usePreferences } from "@/contexts/preferences-context";
 import { Button } from "./ui/button";
 import {
@@ -13,6 +22,7 @@ import {
 import { Input } from "./ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
 import { Label } from "./ui/label";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../hooks/use-toast";
 import { LanguageSelector } from "./language-selector";
@@ -37,6 +47,7 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [otpExpiresAt, setOtpExpiresAt] = useState<number | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const {
@@ -57,24 +68,16 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
       return;
     }
 
-    const updateCountdown = () => {
-      setSecondsLeft(Math.max(0, Math.ceil((otpExpiresAt - Date.now()) / 1000)));
-    };
-
-    updateCountdown();
-
     const interval = window.setInterval(() => {
       const remainingSeconds = Math.max(
         0,
         Math.ceil((otpExpiresAt - Date.now()) / 1000),
       );
       setSecondsLeft(remainingSeconds);
-
-      if (remainingSeconds === 0) {
-        window.clearInterval(interval);
-      }
+      if (remainingSeconds === 0) window.clearInterval(interval);
     }, 1000);
 
+    setSecondsLeft(Math.max(0, Math.ceil((otpExpiresAt - Date.now()) / 1000)));
     return () => window.clearInterval(interval);
   }, [otpExpiresAt]);
 
@@ -92,19 +95,26 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
 
   const getErrorDescription = (error: any, fallback: string) => {
     const errorData = error.response?.data;
-
     if (errorData) {
       if (Array.isArray(errorData.message)) return errorData.message.join(", ");
       if (typeof errorData.message === "string") return errorData.message;
       if (errorData.error) return errorData.error;
     }
-
     return error.message || fallback;
+  };
+
+  const showLogin = () => {
+    setStep("login");
+    setOtp("");
+    setNewPassword("");
+    setOtpExpiresAt(null);
+    setFormError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setFormError(null);
 
     try {
       if (step === "login") {
@@ -131,14 +141,12 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
         await resetPassword(otp, newPassword);
       }
     } catch (error: any) {
-      console.error("Authentication error details:", error.response?.data);
+      const description = getErrorDescription(error, t("auth.genericError"));
+      setFormError(description);
       toast({
         variant: "destructive",
         title: t("auth.authenticationFailed"),
-        description: getErrorDescription(
-          error,
-          t("auth.genericError"),
-        ),
+        description,
       });
     } finally {
       setIsSubmitting(false);
@@ -180,8 +188,8 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
 
   const handleResendOtp = async () => {
     if (!email) return;
-
     setIsSubmitting(true);
+    setFormError(null);
     try {
       const expiresInSeconds =
         step === "loginOtp" ? await login(email, password) : await forgotPassword(email);
@@ -192,13 +200,15 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
         description: t("auth.otpSentDescription"),
       });
     } catch (error: any) {
+      const description = getErrorDescription(
+        error,
+        t("auth.resendFailedDescription"),
+      );
+      setFormError(description);
       toast({
         variant: "destructive",
         title: t("auth.resendFailed"),
-        description: getErrorDescription(
-          error,
-          t("auth.resendFailedDescription"),
-        ),
+        description,
       });
     } finally {
       setIsSubmitting(false);
@@ -206,181 +216,229 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
   };
 
   return (
-    <div className="flex h-screen items-center justify-center bg-background p-4">
-      <div className="absolute left-4 top-4">
+    <div className="relative flex h-screen overflow-hidden bg-background p-4">
+      <div className="soft-grid pointer-events-none absolute inset-0 opacity-60" />
+      <div className="absolute left-4 top-4 z-20">
         <LanguageSelector />
       </div>
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-2 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-            {isOtpStep ? (
-              <ShieldCheck className="h-6 w-6 text-primary-foreground" />
-            ) : step === "forgotEmail" || step === "resetPassword" ? (
-              <MailCheck className="h-6 w-6 text-primary-foreground" />
-            ) : (
-              <Bot className="h-6 w-6 text-primary-foreground" />
-            )}
+
+      <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
+        <section className="hidden animate-rise lg:block">
+          <div className="max-w-xl space-y-8">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/60 px-3 py-1.5 text-xs font-semibold text-muted-foreground shadow-sm backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              AI writing workspace
+            </div>
+            <div className="space-y-4">
+              <h1 className="max-w-lg text-5xl font-semibold leading-tight text-foreground">
+                A cleaner command center for better writing.
+              </h1>
+              <p className="max-w-lg text-base leading-7 text-muted-foreground">
+                Secure sessions, multilingual preferences, file-aware prompts,
+                and a focused chat workspace designed for polished demos.
+              </p>
+            </div>
+            <div className="grid max-w-lg grid-cols-3 gap-3">
+              {[
+                ["2FA", "OTP protected"],
+                ["AI", "Agent ready"],
+                ["UX", "Built for flow"],
+              ].map(([value, label]) => (
+                <div key={value} className="premium-panel rounded-lg p-4">
+                  <p className="text-2xl font-semibold">{value}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{label}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <CardTitle className="text-xl font-semibold">
-            {screenCopy.title}
-          </CardTitle>
-          <CardDescription className="text-sm text-muted-foreground">
-            {screenCopy.description}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {(step === "login" || step === "forgotEmail") && (
-              <div className="space-y-2">
-                <Label htmlFor="email">{t("auth.email")}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder={t("auth.emailPlaceholder")}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-            )}
+        </section>
 
-            {step === "login" && (
-              <div className="space-y-2">
-                <Label htmlFor="password">{t("auth.password")}</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder={t("auth.password")}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
+        <Card className="animate-rise w-full max-w-md justify-self-center overflow-hidden">
+          <CardHeader className="space-y-4 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl premium-gradient shadow-lg shadow-primary/25">
+              {isOtpStep ? (
+                <ShieldCheck className="h-7 w-7 text-primary-foreground" />
+              ) : step === "forgotEmail" || step === "resetPassword" ? (
+                <MailCheck className="h-7 w-7 text-primary-foreground" />
+              ) : (
+                <Bot className="h-7 w-7 text-primary-foreground" />
+              )}
+            </div>
+            <div className="space-y-2">
+              <CardTitle className="text-2xl font-semibold">
+                {screenCopy.title}
+              </CardTitle>
+              <CardDescription className="text-sm leading-6">
+                {screenCopy.description}
+              </CardDescription>
+            </div>
+            {formError && (
+              <Alert variant="destructive" className="text-left">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>{t("auth.authenticationFailed")}</AlertTitle>
+                <AlertDescription>{formError}</AlertDescription>
+              </Alert>
             )}
+            {isOtpStep && !formError && (
+              <Alert className="border-primary/20 bg-primary/5 text-left">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                <AlertTitle>{t("auth.otpSent")}</AlertTitle>
+                <AlertDescription>{t("auth.otpSentDescription")}</AlertDescription>
+              </Alert>
+            )}
+          </CardHeader>
 
-            {isOtpStep && (
-              <div className="space-y-3">
-                <Label htmlFor="otp">{t("auth.otp")}</Label>
-                <InputOTP
-                  id="otp"
-                  maxLength={6}
-                  value={otp}
-                  onChange={setOtp}
-                  containerClassName="justify-center"
-                  disabled={isOtpExpired}
-                >
-                  <InputOTPGroup>
-                    {Array.from({ length: 6 }).map((_, index) => (
-                      <InputOTPSlot key={index} index={index} />
-                    ))}
-                  </InputOTPGroup>
-                </InputOTP>
-                <div className="rounded-xl border border-border/70 bg-muted/30 px-4 py-3">
-                  <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary/80">
-                    {t("auth.otpTimer")}
-                  </p>
-                  <div className="mt-2 flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">
-                        {isOtpExpired
-                          ? t("auth.codeExpired")
-                          : t("auth.codeExpiresIn", {
-                              time: formatTime(secondsLeft),
-                            })}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {isOtpExpired
-                          ? t("auth.requestNewOtp")
-                          : t("auth.enterCodeBeforeCountdown")}
-                      </p>
-                    </div>
-                    <div className="rounded-full bg-background px-3 py-1 text-sm font-semibold text-primary shadow-sm">
-                      {formatTime(secondsLeft)}
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {(step === "login" || step === "forgotEmail") && (
+                <div className="space-y-2">
+                  <Label htmlFor="email">{t("auth.email")}</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder={t("auth.emailPlaceholder")}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+
+              {step === "login" && (
+                <div className="space-y-2">
+                  <Label htmlFor="password">{t("auth.password")}</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder={t("auth.password")}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+
+              {isOtpStep && (
+                <div className="space-y-3">
+                  <Label htmlFor="otp">{t("auth.otp")}</Label>
+                  <InputOTP
+                    id="otp"
+                    maxLength={6}
+                    value={otp}
+                    onChange={setOtp}
+                    containerClassName="justify-center"
+                    disabled={isOtpExpired}
+                  >
+                    <InputOTPGroup>
+                      {Array.from({ length: 6 }).map((_, index) => (
+                        <InputOTPSlot key={index} index={index} />
+                      ))}
+                    </InputOTPGroup>
+                  </InputOTP>
+                  <div className="rounded-lg border border-border/70 bg-muted/35 px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/80">
+                      {t("auth.otpTimer")}
+                    </p>
+                    <div className="mt-2 flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">
+                          {isOtpExpired
+                            ? t("auth.codeExpired")
+                            : t("auth.codeExpiresIn", {
+                                time: formatTime(secondsLeft),
+                              })}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {isOtpExpired
+                            ? t("auth.requestNewOtp")
+                            : t("auth.enterCodeBeforeCountdown")}
+                        </p>
+                      </div>
+                      <div className="rounded-full bg-background/80 px-3 py-1 text-sm font-semibold text-primary shadow-sm">
+                        {formatTime(secondsLeft)}
+                      </div>
                     </div>
                   </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleResendOtp}
+                    disabled={isSubmitting || (step === "loginOtp" && !password)}
+                  >
+                    {t("auth.resendOtp")}
+                  </Button>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleResendOtp}
-                  disabled={isSubmitting || (step === "loginOtp" && !password)}
-                >
-                  {t("auth.resendOtp")}
-                </Button>
-              </div>
-            )}
-
-            {step === "resetPassword" && (
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">{t("auth.newPassword")}</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  placeholder={t("auth.newPassword")}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                />
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isSubmitting || (isOtpStep && isOtpExpired)}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {screenCopy.loading}
-                </>
-              ) : (
-                screenCopy.action
               )}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          {step === "login" ? (
-            <>
-              <button
-                onClick={() => {
-                  setStep("forgotEmail");
-                  setPassword("");
-                  setOtp("");
-                  setOtpExpiresAt(null);
-                }}
-                className="text-sm font-medium text-primary hover:underline"
+
+              {step === "resetPassword" && (
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">{t("auth.newPassword")}</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    placeholder={t("auth.newPassword")}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                className="h-11 w-full"
+                disabled={isSubmitting || (isOtpStep && isOtpExpired)}
               >
-                {t("auth.forgotPassword")}
-              </button>
-              <div className="text-sm text-muted-foreground">
-                {t("auth.noAccount")}{" "}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {screenCopy.loading}
+                  </>
+                ) : (
+                  screenCopy.action
+                )}
+              </Button>
+            </form>
+          </CardContent>
+
+          <CardFooter className="flex flex-col space-y-3">
+            {step === "login" ? (
+              <>
                 <button
-                  onClick={onSwitchToSignup}
-                  className="font-medium text-primary hover:underline"
+                  onClick={() => {
+                    setStep("forgotEmail");
+                    setPassword("");
+                    setOtp("");
+                    setOtpExpiresAt(null);
+                    setFormError(null);
+                  }}
+                  className="text-sm font-semibold text-primary transition-colors hover:text-primary/80"
                 >
-                  {t("auth.signUp")}
+                  {t("auth.forgotPassword")}
                 </button>
-              </div>
-            </>
-          ) : (
-            <button
-              onClick={() => {
-                setStep("login");
-                setOtp("");
-                setNewPassword("");
-                setOtpExpiresAt(null);
-              }}
-              className="inline-flex items-center text-sm font-medium text-primary hover:underline"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              {t("auth.backToLogin")}
-            </button>
-          )}
-        </CardFooter>
-      </Card>
+                <div className="text-sm text-muted-foreground">
+                  {t("auth.noAccount")}{" "}
+                  <button
+                    onClick={onSwitchToSignup}
+                    className="font-semibold text-primary transition-colors hover:text-primary/80"
+                  >
+                    {t("auth.signUp")}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <button
+                onClick={showLogin}
+                className="inline-flex items-center text-sm font-semibold text-primary transition-colors hover:text-primary/80"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                {t("auth.backToLogin")}
+              </button>
+            )}
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
 };

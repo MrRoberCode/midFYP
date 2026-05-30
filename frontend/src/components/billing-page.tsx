@@ -164,16 +164,19 @@ export const BillingPage = () => {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center bg-background">
-        <Loader2 className="h-7 w-7 animate-spin text-primary" />
+      <div className="flex h-full items-center justify-center bg-transparent">
+        <div className="premium-panel flex items-center gap-3 rounded-lg px-4 py-3">
+          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          <span className="text-sm text-muted-foreground">{t("billing.title")}</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <main className="h-full overflow-auto bg-background">
+    <main className="h-full overflow-auto bg-transparent">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="premium-panel animate-rise flex flex-col gap-4 rounded-lg p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
             <Button
               variant="ghost"
@@ -184,7 +187,7 @@ export const BillingPage = () => {
               {t("billing.back")}
             </Button>
             <div>
-              <h1 className="text-2xl font-semibold tracking-normal">
+              <h1 className="text-3xl font-semibold tracking-normal">
                 {t("billing.title")}
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -192,7 +195,7 @@ export const BillingPage = () => {
               </p>
             </div>
           </div>
-          <div className="rounded-lg border bg-muted/30 px-4 py-3">
+          <div className="rounded-lg border border-primary/20 bg-primary/8 px-4 py-3 shadow-sm">
             <p className="text-xs font-medium uppercase text-muted-foreground">
               {t("billing.currentPlan")}
             </p>
@@ -203,7 +206,7 @@ export const BillingPage = () => {
         </div>
 
         {verifying && (
-          <div className="flex items-center rounded-lg border bg-primary/5 px-4 py-3 text-sm text-primary">
+          <div className="flex items-center rounded-lg border border-primary/20 bg-primary/8 px-4 py-3 text-sm text-primary">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             {t("billing.verifying")}
           </div>
@@ -221,13 +224,13 @@ export const BillingPage = () => {
                 key={plan.id}
                 className={
                   isFeatured
-                    ? "border-primary shadow-sm"
-                    : "border-border/80 shadow-none"
+                    ? "animate-rise border-primary/60 shadow-xl shadow-primary/15"
+                    : "animate-rise border-border/80 shadow-sm"
                 }
               >
                 <CardHeader className="space-y-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10">
                       <Icon className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex gap-2">
@@ -244,7 +247,7 @@ export const BillingPage = () => {
                     </CardDescription>
                   </div>
                   <div className="flex items-end gap-1">
-                    <span className="text-3xl font-semibold">
+                    <span className="text-4xl font-semibold">
                       {plan.price === 0 ? t("billing.free") : `$${plan.price / 100}`}
                     </span>
                     {plan.price > 0 && (

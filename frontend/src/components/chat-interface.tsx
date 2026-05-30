@@ -85,35 +85,35 @@ const EmptyStateWithInput: React.FC<{
   ];
 
   return (
-    <div className="flex h-full flex-col bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="flex flex-1 items-center justify-center overflow-y-auto p-6">
+    <div className="flex h-full flex-col bg-transparent">
+      <div className="flex flex-1 items-center justify-center overflow-y-auto p-4 sm:p-6">
         <div className="w-full max-w-3xl text-center">
-          <div className="mb-6">
-            <div className="relative mb-4 inline-flex h-16 w-16 items-center justify-center">
-              <div className="absolute inset-0 rounded-2xl bg-primary/20 animate-pulse"></div>
-              <Bot className="relative z-10 h-8 w-8 text-primary" />
-              <Sparkles className="absolute -right-1 -top-1 h-4 w-4 text-primary/60" />
+          <div className="mb-7 animate-rise">
+            <div className="relative mb-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl premium-gradient shadow-xl shadow-primary/20">
+              <div className="absolute inset-0 rounded-2xl bg-white/10 animate-pulse"></div>
+              <Bot className="relative z-10 h-8 w-8 text-primary-foreground" />
+              <Sparkles className="absolute -right-1 -top-1 h-4 w-4 text-primary-foreground" />
             </div>
-            <h1 className="mb-2 text-2xl font-bold text-foreground">
+            <h1 className="mb-2 text-3xl font-semibold text-foreground sm:text-4xl">
               {t("chat.heroTitle")}
             </h1>
-            <p className="mb-4 text-sm text-muted-foreground">
+            <p className="mx-auto mb-4 max-w-xl text-sm leading-6 text-muted-foreground">
               {t("chat.heroDescription")}
             </p>
           </div>
 
-          <div className="mb-6">
-            <h2 className="mb-4 text-lg font-semibold text-foreground">
+          <div className="animate-rise mb-6 rounded-lg border border-border/70 bg-card/60 p-3 shadow-xl shadow-black/5 backdrop-blur">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">
               {t("chat.writeToday")}
             </h2>
 
             <Tabs defaultValue="business" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid h-auto w-full grid-cols-2 gap-1 bg-muted/60 p-1 sm:grid-cols-4">
                 {writingCategories.map((category) => (
                   <TabsTrigger
                     key={category.id}
                     value={category.id}
-                    className="flex items-center gap-1.5 text-xs"
+                    className="flex items-center gap-1.5 rounded-md py-2 text-xs"
                   >
                     {category.icon}
                     <span className="hidden sm:inline">{category.title}</span>
@@ -132,7 +132,7 @@ const EmptyStateWithInput: React.FC<{
                       <button
                         key={promptIndex}
                         onClick={() => setInputText(prompt)}
-                        className="group rounded-lg border border-muted/50 bg-muted/30 p-3 text-left text-sm transition-all duration-200 hover:border-muted hover:bg-muted/50"
+                        className="group rounded-lg border border-border/70 bg-background/55 p-3 text-left text-sm shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/5 hover:shadow-md"
                       >
                         <span className="text-foreground transition-colors group-hover:text-primary">
                           {prompt}
@@ -147,7 +147,7 @@ const EmptyStateWithInput: React.FC<{
         </div>
       </div>
 
-      <div className="border-t bg-background/95 backdrop-blur-sm">
+      <div className="border-t border-border/70 bg-background/80 backdrop-blur-xl">
         <div className="p-4">
           <ChatInput
             sendMessage={onNewChatMessage}
@@ -175,8 +175,7 @@ const MessageListEmptyIndicator = () => {
   return (
     <div className="flex h-full items-center justify-center">
       <div className="px-4 text-center">
-        <div className="relative mb-4 inline-flex h-12 w-12 items-center justify-center">
-          <div className="absolute inset-0 rounded-xl bg-primary/10"></div>
+        <div className="relative mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
           <Bot className="relative z-10 h-6 w-6 text-primary/80" />
         </div>
         <h2 className="mb-2 text-lg font-medium text-foreground">
@@ -269,8 +268,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   return (
-    <div className="flex h-full flex-col bg-background">
-      <header className="z-10 flex shrink-0 items-center justify-between border-b bg-background/95 px-4 py-3 backdrop-blur-sm">
+    <div className="flex h-full flex-col bg-transparent">
+      <header className="z-10 flex shrink-0 items-center justify-between border-b border-border/70 bg-background/75 px-4 py-3 backdrop-blur-xl">
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -282,7 +281,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </Button>
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg premium-gradient shadow-lg shadow-primary/20">
                 <Bot className="h-4 w-4 text-primary-foreground" />
               </div>
               {channel?.id && agentStatus.status === "connected" && (
@@ -290,7 +289,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               )}
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-foreground">
+              <h2 className="max-w-[42vw] truncate text-sm font-semibold text-foreground sm:max-w-md">
                 {channel?.data?.name || t("chat.newSession")}
               </h2>
               <p className="text-xs text-muted-foreground">
@@ -302,7 +301,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
         <div className="flex items-center gap-2">
           {channel?.id && agentStatus.status === "connected" && (
-            <div className="flex items-center gap-2">
+            <div className="hidden items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 sm:flex">
               <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
               <span className="text-xs font-medium text-muted-foreground">
                 {t("chat.online")}

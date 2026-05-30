@@ -5,9 +5,10 @@ export const LoadingScreen = () => {
   const { t } = usePreferences();
 
   return (
-    <div className="flex h-screen items-center justify-center bg-background">
-      <div className="space-y-4 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
+    <div className="relative flex h-screen items-center justify-center overflow-hidden bg-background">
+      <div className="soft-grid pointer-events-none absolute inset-0 opacity-60" />
+      <div className="premium-panel animate-rise relative space-y-4 rounded-lg px-8 py-7 text-center">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl premium-gradient shadow-lg shadow-primary/25">
           <Bot className="h-6 w-6 text-primary-foreground" />
         </div>
         <div className="space-y-2">

@@ -9,48 +9,48 @@
     overflow-y: hidden;
   }
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 218 38% 98%;
+    --foreground: 222 47% 8%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 222 47% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 262 80% 60%;
+    --popover-foreground: 222 47% 8%;
+    --primary: 252 78% 56%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 262 80% 60%;
-    --radius: 0.75rem;
+    --secondary: 214 38% 94%;
+    --secondary-foreground: 222 47% 12%;
+    --muted: 215 36% 94%;
+    --muted-foreground: 218 14% 43%;
+    --accent: 186 72% 43%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 78% 56%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 218 24% 87%;
+    --input: 218 24% 87%;
+    --ring: 252 78% 56%;
+    --radius: 0.625rem;
   }
 
   .dark {
-    --background: 220 13% 9%;
-    --foreground: 210 20% 95%;
-    --card: 220 15% 12%;
-    --card-foreground: 210 20% 95%;
-    --popover: 220 15% 12%;
-    --popover-foreground: 210 20% 95%;
-    --primary: 262 80% 60%;
+    --background: 222 42% 6%;
+    --foreground: 216 28% 94%;
+    --card: 222 33% 9%;
+    --card-foreground: 216 28% 94%;
+    --popover: 222 33% 9%;
+    --popover-foreground: 216 28% 94%;
+    --primary: 252 88% 66%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 15% 16%;
-    --secondary-foreground: 210 20% 90%;
-    --muted: 220 15% 16%;
-    --muted-foreground: 220 10% 60%;
-    --accent: 220 15% 18%;
-    --accent-foreground: 210 20% 95%;
-    --destructive: 0 75% 55%;
+    --secondary: 220 24% 14%;
+    --secondary-foreground: 216 28% 92%;
+    --muted: 220 22% 14%;
+    --muted-foreground: 218 13% 66%;
+    --accent: 185 77% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 58%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 15% 20%;
-    --input: 220 15% 18%;
-    --ring: 262 80% 60%;
+    --border: 220 22% 18%;
+    --input: 220 22% 18%;
+    --ring: 252 88% 66%;
   }
 }
 
@@ -60,6 +60,10 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    background:
+      radial-gradient(circle at 15% 10%, hsl(var(--primary) / 0.14), transparent 28rem),
+      radial-gradient(circle at 85% 8%, hsl(var(--accent) / 0.12), transparent 24rem),
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
   }
@@ -90,7 +94,7 @@
   /* Selection styling */
   ::selection {
     background-color: hsl(var(--primary) / 0.2);
-    color: hsl(var(--primary-foreground));
+    color: hsl(var(--foreground));
   }
 
   /* Selection styling for user messages - use a contrasting color */
@@ -176,6 +180,8 @@
     background: var(--str-chat__message-bubble-background);
     color: var(--str-chat__message-bubble-color);
     border: 1px solid var(--str-chat__border-color);
+    border-radius: 18px;
+    box-shadow: 0 12px 28px hsl(222 47% 4% / 0.1);
   }
 
   .str-chat__message-bubble--me {
@@ -185,5 +191,50 @@
 
   .str-chat__theme-dark .str-chat__channel-list-messenger {
     background-color: hsl(var(--background));
+  }
+}
+
+@layer components {
+  .app-surface {
+    background:
+      linear-gradient(135deg, hsl(var(--card) / 0.86), hsl(var(--card) / 0.7)),
+      radial-gradient(circle at top left, hsl(var(--primary) / 0.1), transparent 18rem);
+    border: 1px solid hsl(var(--border) / 0.72);
+    box-shadow: 0 24px 70px hsl(222 47% 4% / 0.16);
+    backdrop-filter: blur(20px);
+  }
+
+  .premium-panel {
+    background: linear-gradient(180deg, hsl(var(--card) / 0.92), hsl(var(--card) / 0.76));
+    border: 1px solid hsl(var(--border) / 0.72);
+    box-shadow: 0 20px 48px hsl(222 47% 4% / 0.14);
+    backdrop-filter: blur(18px);
+  }
+
+  .premium-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  }
+
+  .soft-grid {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.28) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.28) 1px, transparent 1px);
+    background-size: 34px 34px;
+    mask-image: radial-gradient(circle at center, black, transparent 76%);
+  }
+
+  .animate-rise {
+    animation: rise-in 0.45s cubic-bezier(0.21, 1, 0.35, 1) both;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

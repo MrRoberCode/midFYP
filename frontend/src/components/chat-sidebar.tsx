@@ -81,20 +81,26 @@ export const ChatSidebar = ({
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
 
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-80 transform flex-col border-r bg-background transition-transform duration-300 ease-in-out lg:static",
+          "premium-panel fixed inset-y-0 left-0 z-50 flex w-80 transform flex-col border-r transition-transform duration-300 ease-in-out lg:static lg:mr-3 lg:rounded-lg",
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
-        <div className="flex items-center justify-between border-b p-4">
+        <div className="flex items-center justify-between border-b border-border/70 p-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold">{t("chat.sessions")}</h2>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg premium-gradient shadow-lg shadow-primary/20">
+              <MessageCircle className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold">{t("chat.sessions")}</h2>
+              <p className="text-xs text-muted-foreground">{t("chat.brandSubtitle")}</p>
+            </div>
             <SettingsDialog />
           </div>
           <Button
@@ -108,7 +114,7 @@ export const ChatSidebar = ({
         </div>
 
         <ScrollArea className="flex-1">
-          <div className="space-y-0 p-4">
+          <div className="space-y-1 p-3">
             <ChannelList
               filters={filters}
               sort={sort}
@@ -117,10 +123,10 @@ export const ChatSidebar = ({
               Preview={(previewProps) => (
                 <div
                   className={cn(
-                    "group relative mb-1 flex cursor-pointer items-center rounded-lg p-2 transition-colors",
+                    "group relative mb-1 flex cursor-pointer items-center rounded-lg border border-transparent p-3 transition-all duration-200",
                     previewProps.active
-                      ? "bg-primary/20 text-primary-foreground"
-                      : "hover:bg-muted/50",
+                      ? "border-primary/30 bg-primary/12 text-foreground shadow-sm"
+                      : "hover:border-border/80 hover:bg-muted/50",
                   )}
                   onClick={() => {
                     setActiveChannel(previewProps.channel);
@@ -128,7 +134,7 @@ export const ChatSidebar = ({
                     onClose();
                   }}
                 >
-                  <MessageSquare className="mr-2 h-4 w-4" />
+                  <MessageSquare className="mr-2 h-4 w-4 text-primary/80" />
                   <span className="flex-1 truncate text-sm font-medium">
                     {previewProps.channel.data?.name || t("chat.newSession")}
                   </span>
@@ -150,14 +156,14 @@ export const ChatSidebar = ({
           </div>
         </ScrollArea>
 
-        <div className="border-t p-2">
-          <Button onClick={onNewChat} className="w-full justify-start">
+        <div className="border-t border-border/70 p-3">
+          <Button onClick={onNewChat} className="h-11 w-full justify-start">
             <PlusCircle className="mr-2 h-4 w-4" />
             {t("chat.newSession")}
           </Button>
         </div>
 
-        <div className="border-t bg-background p-2">
+        <div className="border-t border-border/70 bg-background/40 p-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
