@@ -10,6 +10,8 @@ import {
   type SupportedLanguage,
   usePreferences,
 } from "@/contexts/preferences-context";
+import { cn } from "@/lib/utils";
+import { Globe2 } from "lucide-react";
 
 interface LanguageSelectorProps {
   className?: string;
@@ -17,18 +19,22 @@ interface LanguageSelectorProps {
 
 export const LanguageSelector = ({ className }: LanguageSelectorProps) => {
   const { language, setLanguage, t } = usePreferences();
+  const currentLanguage =
+    supportedLanguages.find((item) => item.value === language)?.label ??
+    t("common.language");
 
   return (
-    <div className={className}>
+    <div className={cn("inline-flex", className)}>
       <Select
         value={language}
         onValueChange={(value) => setLanguage(value as SupportedLanguage)}
       >
         <SelectTrigger
-          className="h-9 min-w-[148px] bg-background/90"
+          className="h-9 w-auto min-w-[124px] gap-2 rounded-full border-border/70 bg-background/55 px-3 text-xs font-semibold text-muted-foreground shadow-sm backdrop-blur transition-all hover:border-primary/35 hover:bg-primary/5 hover:text-foreground focus:ring-ring/35"
           aria-label={t("auth.languageAriaLabel")}
         >
-          <SelectValue placeholder={t("common.language")} />
+          <Globe2 className="h-3.5 w-3.5 text-primary" />
+          <SelectValue placeholder={currentLanguage} />
         </SelectTrigger>
         <SelectContent dir="ltr">
           {supportedLanguages.map((item) => (

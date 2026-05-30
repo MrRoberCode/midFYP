@@ -73,17 +73,16 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
   return (
     <div className="relative flex h-screen overflow-hidden bg-background p-4">
       <div className="soft-grid pointer-events-none absolute inset-0 opacity-60" />
-      <div className="absolute left-4 top-4 z-20">
-        <LanguageSelector />
-      </div>
-
       <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[0.95fr_1.05fr]">
         <Card className="animate-rise w-full max-w-md justify-self-center overflow-hidden">
-          <CardHeader className="space-y-4 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl premium-gradient shadow-lg shadow-primary/25">
-              <UserPlus className="h-7 w-7 text-primary-foreground" />
+          <CardHeader className="space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl premium-gradient shadow-lg shadow-primary/25">
+                <UserPlus className="h-7 w-7 text-primary-foreground" />
+              </div>
+              <LanguageSelector className="shrink-0" />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 text-left">
               <CardTitle className="text-2xl font-semibold">
                 {t("auth.createAccount")}
               </CardTitle>
