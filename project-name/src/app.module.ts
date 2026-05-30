@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { BillingModule } from './billing/billing.module';
+import { setServers } from 'node:dns';
 
 @Module({
   imports: [
@@ -20,9 +21,19 @@ import { BillingModule } from './billing/billing.module';
 
     // 2. Use forRootAsync so it waits for the environment variables to load
     MongooseModule.forRootAsync({
-      useFactory: () => ({
-        uri: process.env.mongoURL,
-      }),
+      useFactory: () => {
+        const dnsServers = process.env.DNS_SERVERS?.split(',')
+          .map((server) => server.trim())
+          .filter(Boolean);
+
+        if (dnsServers?.length) {
+          setServers(dnsServers);
+        }
+
+        return {
+          uri: process.env.mongoURL,
+        };
+      },
     }),
 
     ProductModule,
