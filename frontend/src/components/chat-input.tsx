@@ -3,7 +3,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { ArrowRight, FileText, Loader2, Square, X } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-// import { FileUploadButton } from "./file-upload-button";
 import { FileUploadButton } from "./fileUploadButton";
 import { WritingPromptsToolbar } from "./writing-prompts-toolbar";
 import { usePreferences } from "@/contexts/preferences-context";
@@ -222,14 +221,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             disabled={isLoading || isGenerating}
           />
 
-          {/* Right side buttons */}
           <div className="absolute bottom-2 right-2 flex items-center gap-1 sm:bottom-3 sm:right-3">
-            {/* File Upload */}
             {channelId && backendUrl && !isGenerating && !selectedFile && (
               <FileUploadButton onFileSelect={handleFileSelect} />
             )}
 
-            {/* Clear text */}
             {value.trim() && !isLoading && !isGenerating && (
               <Button
                 type="button"
@@ -242,7 +238,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               </Button>
             )}
 
-            {/* Send / Stop */}
             {isGenerating ? (
               <Button
                 type="button"

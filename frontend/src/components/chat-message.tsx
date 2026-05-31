@@ -69,7 +69,6 @@ const ChatMessage: React.FC = () => {
           isUser ? "flex-row-reverse" : "flex-row"
         )}
       >
-        {/* Avatar */}
         {!isUser && (
           <div className="mr-2 hidden flex-shrink-0 self-end sm:mr-3 sm:block">
             <Avatar className="h-8 w-8">
@@ -80,9 +79,7 @@ const ChatMessage: React.FC = () => {
           </div>
         )}
 
-        {/* Message Content */}
         <div className="flex min-w-0 flex-col space-y-1">
-          {/* Message Bubble */}
           <div
             className={cn(
               "min-w-0 rounded-2xl px-3 py-2.5 text-[0.92rem] leading-relaxed transition-all duration-200 sm:px-4 sm:py-3 sm:text-sm",
@@ -128,7 +125,6 @@ const ChatMessage: React.FC = () => {
               </div>
             )}
 
-            {/* Message Text */}
             <div className="min-w-0 break-words [overflow-wrap:anywhere]">
               <ReactMarkdown
                 components={{
@@ -195,7 +191,6 @@ const ChatMessage: React.FC = () => {
               </ReactMarkdown>
             </div>
 
-            {/* Loading State */}
             {aiState && !streamedMessageText && !message.text && (
               <div className="flex items-center gap-2 mt-2 pt-2">
                 <span className="text-xs opacity-70">
@@ -210,14 +205,11 @@ const ChatMessage: React.FC = () => {
             )}
           </div>
 
-          {/* Timestamp and Actions */}
           <div className="flex items-center justify-between px-1">
-            {/* Timestamp - Always left aligned */}
             <span className="text-xs text-muted-foreground/70">
               {formatTime(message.created_at || new Date())}
             </span>
 
-            {/* Actions - Only for AI messages, always right aligned */}
             {!isUser && !!streamedMessageText && (
               <div className="opacity-100 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100">
                 <Button

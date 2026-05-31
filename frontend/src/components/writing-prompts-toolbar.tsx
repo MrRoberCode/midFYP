@@ -71,16 +71,13 @@ export const WritingPromptsToolbar: React.FC<WritingPromptsToolbarProps> = ({
 
   return (
     <div className={`relative ${className}`}>
-      {/* Expanded Menu */}
       {isExpanded && (
         <>
-          {/* Backdrop to close menu when clicking outside */}
           <div
             className="fixed inset-0 z-10"
             onClick={() => setIsExpanded(false)}
           />
 
-          {/* Menu content */}
           <div className="absolute bottom-full left-0 right-0 z-20 mb-2">
             <div className="mx-2 max-h-[52dvh] overflow-y-auto rounded-lg border bg-background shadow-xl sm:mx-4">
               <div className="grid grid-cols-1 gap-2 p-2.5 sm:grid-cols-2 sm:p-3 lg:grid-cols-3">
@@ -115,7 +112,6 @@ export const WritingPromptsToolbar: React.FC<WritingPromptsToolbarProps> = ({
         </>
       )}
 
-      {/* Toolbar - always visible */}
       <div className="border-t bg-background">
         <div className="flex min-w-0 items-center gap-1.5 px-2.5 py-2 sm:gap-2 sm:px-4">
           <Button
