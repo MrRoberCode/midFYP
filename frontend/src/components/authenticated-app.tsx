@@ -145,7 +145,7 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
   }
 
   return (
-    <div className="flex h-full w-full overflow-hidden bg-background p-0 lg:p-3">
+    <div className="flex h-full w-full min-w-0 overflow-hidden bg-background p-0 lg:p-3">
       <ChatSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

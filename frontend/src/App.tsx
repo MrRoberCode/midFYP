@@ -17,7 +17,7 @@ function AppContent() {
   }
 
   return (
-    <div className="h-screen bg-background" dir="ltr">
+    <div className="h-[100dvh] min-h-[100svh] overflow-hidden bg-background" dir="ltr">
       {user ? (
         <AuthenticatedApp user={user} onLogout={logout} />
       ) : isLoginView ? (
@@ -43,4 +43,3 @@ function App() {
 }
 
 export default App;
-

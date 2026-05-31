@@ -81,9 +81,9 @@ export const WritingPromptsToolbar: React.FC<WritingPromptsToolbarProps> = ({
           />
 
           {/* Menu content */}
-          <div className="absolute bottom-full left-0 right-0 mb-2 z-20">
-            <div className="bg-background border rounded-lg shadow-xl mx-4">
-              <div className="p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="absolute bottom-full left-0 right-0 z-20 mb-2">
+            <div className="mx-2 max-h-[52dvh] overflow-y-auto rounded-lg border bg-background shadow-xl sm:mx-4">
+              <div className="grid grid-cols-1 gap-2 p-2.5 sm:grid-cols-2 sm:p-3 lg:grid-cols-3">
                 {toolbarPrompts.map((prompt, index) => {
                   const IconComponent = prompt.icon;
                   return (
@@ -95,10 +95,10 @@ export const WritingPromptsToolbar: React.FC<WritingPromptsToolbarProps> = ({
                         onPromptSelect(prompt.text);
                         setIsExpanded(false);
                       }}
-                      className="h-auto p-2 text-xs text-left justify-start hover:bg-muted/50"
+                      className="h-auto min-w-0 justify-start p-2 text-left text-xs hover:bg-muted/50"
                     >
                       <IconComponent className="h-4 w-4 mr-2 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
+                      <div className="min-w-0 flex-1">
                         <div className="truncate font-medium">
                           {prompt.text}
                         </div>
@@ -116,13 +116,13 @@ export const WritingPromptsToolbar: React.FC<WritingPromptsToolbarProps> = ({
       )}
 
       {/* Toolbar - always visible */}
-      <div className="bg-background border-t">
-        <div className="flex items-center px-4 py-2 gap-2">
+      <div className="border-t bg-background">
+        <div className="flex min-w-0 items-center gap-1.5 px-2.5 py-2 sm:gap-2 sm:px-4">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="h-7 px-2 text-xs font-medium flex-shrink-0"
+            className="h-9 flex-shrink-0 px-2 text-xs font-medium sm:h-7"
           >
             {isExpanded ? (
               <ChevronDown className="h-4 w-4 mr-1" />
@@ -132,7 +132,7 @@ export const WritingPromptsToolbar: React.FC<WritingPromptsToolbarProps> = ({
             {t("prompt.toolbar")}
           </Button>
 
-          <ScrollArea className="flex-1 max-w-full">
+          <ScrollArea className="max-w-full min-w-0 flex-1">
             <div className="flex gap-1 pb-1">
               {toolbarPrompts.slice(0, 3).map((prompt, index) => {
                 const IconComponent = prompt.icon;
@@ -142,10 +142,12 @@ export const WritingPromptsToolbar: React.FC<WritingPromptsToolbarProps> = ({
                     variant="outline"
                     size="sm"
                     onClick={() => onPromptSelect(prompt.text)}
-                    className="h-7 px-2 text-xs whitespace-nowrap flex-shrink-0 hover:bg-muted/50"
+                    className="h-9 flex-shrink-0 whitespace-nowrap px-2 text-xs hover:bg-muted/50 sm:h-7"
                   >
                     <IconComponent className="h-3 w-3 mr-1" />
-                    {prompt.text}
+                    <span className="max-w-[8rem] truncate sm:max-w-none">
+                      {prompt.text}
+                    </span>
                   </Button>
                 );
               })}

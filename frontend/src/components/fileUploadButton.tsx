@@ -214,7 +214,7 @@ export const FileUploadButton: React.FC<FileUploadButtonProps> = ({
         variant="ghost"
         size="icon"
         onClick={() => fileInputRef.current?.click()}
-        className="h-8 w-8 rounded-md text-muted-foreground hover:text-foreground"
+        className="h-9 w-9 rounded-md text-muted-foreground hover:text-foreground sm:h-8 sm:w-8"
         title={t("chat.uploadPdfOrImage")}
       >
         <Paperclip className="h-4 w-4" />

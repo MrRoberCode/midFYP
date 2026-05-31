@@ -59,19 +59,19 @@ const ChatMessage: React.FC = () => {
   return (
     <div
       className={cn(
-        "flex w-full mb-4 px-4 group",
+        "group mb-3 flex w-full min-w-0 px-2.5 sm:mb-4 sm:px-4",
         isUser ? "justify-end" : "justify-start"
       )}
     >
       <div
         className={cn(
-          "flex max-w-[70%] sm:max-w-[60%] lg:max-w-[50%]",
+          "flex min-w-0 max-w-[92%] sm:max-w-[78%] lg:max-w-[64%] xl:max-w-[56rem]",
           isUser ? "flex-row-reverse" : "flex-row"
         )}
       >
         {/* Avatar */}
         {!isUser && (
-          <div className="flex-shrink-0 mr-3 self-end">
+          <div className="mr-2 hidden flex-shrink-0 self-end sm:mr-3 sm:block">
             <Avatar className="h-8 w-8">
               <AvatarFallback className="bg-muted text-muted-foreground">
                 <Bot className="h-4 w-4" />
@@ -81,11 +81,11 @@ const ChatMessage: React.FC = () => {
         )}
 
         {/* Message Content */}
-        <div className="flex flex-col space-y-1">
+        <div className="flex min-w-0 flex-col space-y-1">
           {/* Message Bubble */}
           <div
             className={cn(
-              "px-4 py-3 rounded-2xl text-sm leading-relaxed transition-all duration-200",
+              "min-w-0 rounded-2xl px-3 py-2.5 text-[0.92rem] leading-relaxed transition-all duration-200 sm:px-4 sm:py-3 sm:text-sm",
               isUser
                 ? "str-chat__message-bubble str-chat__message-bubble--me rounded-br-md"
                 : "str-chat__message-bubble rounded-bl-md"
@@ -103,7 +103,7 @@ const ChatMessage: React.FC = () => {
                         key={attachment.id || index}
                         src={attachment.image_url}
                         alt={attachment.title || t("chat.uploadedImage")}
-                        className="max-h-60 w-full rounded-xl object-cover border border-border/50"
+                        className="max-h-60 max-w-full rounded-xl border border-border/50 object-cover"
                       />
                     );
                   }
@@ -111,7 +111,7 @@ const ChatMessage: React.FC = () => {
                   return (
                     <div
                       key={attachment.id || index}
-                      className="flex items-center gap-3 rounded-xl border border-border/50 bg-background/40 p-3"
+                      className="flex min-w-0 items-center gap-3 rounded-xl border border-border/50 bg-background/40 p-3"
                     >
                       <FileText className="h-5 w-5 shrink-0 text-muted-foreground" />
                       <div className="min-w-0">
@@ -129,7 +129,7 @@ const ChatMessage: React.FC = () => {
             )}
 
             {/* Message Text */}
-            <div className="break-words">
+            <div className="min-w-0 break-words [overflow-wrap:anywhere]">
               <ReactMarkdown
                 components={{
                   p: ({ children }) => (
@@ -147,7 +147,7 @@ const ChatMessage: React.FC = () => {
                         {children}
                       </code>
                     ) : (
-                      <pre className="p-3 rounded-md overflow-x-auto my-2 text-xs font-mono bg-black/5 dark:bg-white/5">
+                      <pre className="my-2 max-w-full overflow-x-auto rounded-md bg-black/5 p-3 text-xs font-mono dark:bg-white/5">
                         <code {...rest}>{children}</code>
                       </pre>
                     );
@@ -219,7 +219,7 @@ const ChatMessage: React.FC = () => {
 
             {/* Actions - Only for AI messages, always right aligned */}
             {!isUser && !!streamedMessageText && (
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="opacity-100 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100">
                 <Button
                   variant="ghost"
                   size="sm"

@@ -7,6 +7,7 @@
 @layer base {
   html {
     overflow-y: hidden;
+    overflow-x: hidden;
   }
   :root {
     --background: 218 38% 98%;
@@ -71,8 +72,18 @@
   /* Disable bouncy scroll effect globally */
   html,
   body {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
     overscroll-behavior-y: none;
     -webkit-overflow-scrolling: touch;
+  }
+
+  #root {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    overflow: hidden;
   }
 
   /* Disable overscroll for all scrollable elements */
@@ -191,6 +202,58 @@
 
   .str-chat__theme-dark .str-chat__channel-list-messenger {
     background-color: hsl(var(--background));
+  }
+
+  .chat-channel-shell,
+  .chat-channel-shell .str-chat__main-panel,
+  .chat-channel-shell .str-chat__window {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    flex: 1 1 auto;
+    flex-direction: column;
+    background: transparent;
+  }
+
+  .chat-channel-shell .str-chat__list {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-x: hidden;
+    background: transparent;
+  }
+
+  .chat-channel-shell .str-chat__virtual-list,
+  .chat-channel-shell .str-chat__message-list-scroll {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow-x: hidden;
+    background: transparent;
+  }
+
+  .chat-channel-shell .str-chat__li,
+  .chat-channel-shell .str-chat__message,
+  .chat-channel-shell .str-chat__message-inner,
+  .chat-channel-shell .str-chat__message-bubble {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .chat-channel-shell img,
+  .chat-channel-shell video,
+  .chat-channel-shell canvas,
+  .chat-channel-shell table {
+    max-width: 100%;
+  }
+
+  .chat-channel-shell pre,
+  .chat-channel-shell code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 }
 

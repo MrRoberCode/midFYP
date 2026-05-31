@@ -160,7 +160,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   return (
     <div
       className={cn(
-        "flex flex-col bg-background/80 backdrop-blur-xl",
+        "flex min-w-0 shrink-0 flex-col bg-background/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl",
         showPromptToolbar && "border-t border-border/60"
       )}
     >
@@ -168,10 +168,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <WritingPromptsToolbar onPromptSelect={handlePromptSelect} />
       )}
 
-      <div className={cn("p-4", className)}>
+      <div className={cn("min-w-0 p-3 sm:p-4", className)}>
         {/* File Preview — ChatGPT style */}
         {selectedFile && (
-          <div className="mb-3 flex w-fit max-w-xs items-center gap-2 rounded-lg border border-border/70 bg-muted/45 p-2 shadow-sm">
+          <div className="mb-3 flex w-full max-w-full items-center gap-2 rounded-lg border border-border/70 bg-muted/45 p-2 shadow-sm sm:w-fit sm:max-w-xs">
             {selectedFile.previewUrl ? (
               <img
                 src={selectedFile.previewUrl}
@@ -183,8 +183,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 <FileText className="h-5 w-5 text-red-500" />
               </div>
             )}
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium truncate">{selectedFile.fileName}</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-medium">{selectedFile.fileName}</p>
               <p className="text-xs text-muted-foreground">
                 {selectedFile.mimeType === "application/pdf"
                   ? t("chat.fileTypePdf")
@@ -196,7 +196,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               variant="ghost"
               size="icon"
               onClick={handleRemoveFile}
-              className="h-6 w-6 flex-shrink-0"
+              className="h-8 w-8 flex-shrink-0 sm:h-6 sm:w-6"
             >
               <X className="h-3 w-3" />
             </Button>
@@ -204,7 +204,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         )}
 
         {/* Input Area */}
-        <div className="relative rounded-lg border border-border/70 bg-card/70 p-1 shadow-[0_16px_36px_hsl(222_47%_4%/0.12)] transition-all focus-within:border-primary/35 focus-within:shadow-primary/10">
+        <div className="relative mx-auto w-full max-w-4xl rounded-lg border border-border/70 bg-card/80 p-1 shadow-[0_16px_36px_hsl(222_47%_4%/0.12)] transition-all focus-within:border-primary/35 focus-within:shadow-primary/10">
           <Textarea
             ref={textareaRef}
             value={value}
@@ -216,14 +216,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 : placeholder
             }
             className={cn(
-              "min-h-[52px] max-h-[120px] resize-none border-0 bg-transparent py-3 pl-4 pr-24 text-sm shadow-none",
+              "min-h-[48px] max-h-[34dvh] resize-none border-0 bg-transparent py-3 pl-3 pr-[6.75rem] text-[16px] leading-6 shadow-none sm:min-h-[52px] sm:pl-4 sm:pr-28 sm:text-sm",
               "focus-visible:ring-0"
             )}
             disabled={isLoading || isGenerating}
           />
 
           {/* Right side buttons */}
-          <div className="absolute bottom-3 right-3 flex items-center gap-1">
+          <div className="absolute bottom-2 right-2 flex items-center gap-1 sm:bottom-3 sm:right-3">
             {/* File Upload */}
             {channelId && backendUrl && !isGenerating && !selectedFile && (
               <FileUploadButton onFileSelect={handleFileSelect} />
@@ -236,7 +236,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 variant="ghost"
                 size="icon"
                 onClick={() => onValueChange("")}
-                className="h-8 w-8 rounded-md text-muted-foreground hover:text-foreground"
+                className="h-9 w-9 rounded-md text-muted-foreground hover:text-foreground sm:h-8 sm:w-8"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -247,7 +247,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               <Button
                 type="button"
                 onClick={onStopGenerating}
-                className="h-9 w-9 rounded-md p-0"
+                className="h-10 w-10 rounded-md p-0 sm:h-9 sm:w-9"
                 variant="destructive"
               >
                 <Square className="h-4 w-4" />
@@ -258,7 +258,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 onClick={handleSubmit}
                 disabled={!canSend}
                 className={cn(
-                  "h-9 w-9 rounded-md p-0 transition-all duration-200",
+                  "h-10 w-10 rounded-md p-0 transition-all duration-200 sm:h-9 sm:w-9",
                   "disabled:opacity-30 disabled:cursor-not-allowed",
                   !canSend ? "bg-muted hover:bg-muted" : ""
                 )}
