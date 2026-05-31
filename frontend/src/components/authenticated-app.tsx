@@ -46,6 +46,12 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
   const backendUrl = import.meta.env.VITE_AI_URL as string;
   const isBillingView = location.pathname.startsWith("/billing");
 
+  const closeSidebarOnCompactLayout = () => {
+    if (window.innerWidth < 1024) {
+      setSidebarOpen(false);
+    }
+  };
+
   useEffect(() => {
     const syncChannelWithUrl = async () => {
       if (!client) return;
@@ -147,7 +153,7 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
         onNewChat={() => {
           setActiveChannel(undefined);
           navigate("/");
-          setSidebarOpen(false);
+          closeSidebarOnCompactLayout();
         }}
         onChannelDelete={(channel) => {
           setChannelToDelete(channel);
@@ -163,6 +169,7 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden lg:rounded-lg lg:border lg:border-border/60 lg:bg-card/40">
           <ChatInterface
             onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            isSidebarOpen={sidebarOpen}
             onNewChatMessage={handleNewChatMessage}
             backendUrl={backendUrl}
           />

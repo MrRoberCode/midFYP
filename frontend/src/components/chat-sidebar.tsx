@@ -76,45 +76,60 @@ export const ChatSidebar = ({
   };
   const sort: ChannelSort = { last_message_at: -1 };
   const options = { state: true, presence: true, limit: 10 };
+  const closeAfterNavigation = () => {
+    if (window.innerWidth < 1024) {
+      onClose();
+    }
+  };
 
   return (
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/55 backdrop-blur-sm transition-opacity duration-300 lg:hidden"
           onClick={onClose}
+          aria-hidden="true"
         />
       )}
 
-      <div
+      <aside
+        id="chat-sidebar"
+        aria-label={t("chat.sessions")}
+        aria-hidden={!isOpen}
+        inert={!isOpen ? "" : undefined}
         className={cn(
-          "premium-panel fixed inset-y-0 left-0 z-50 flex w-80 transform flex-col border-r transition-transform duration-300 ease-in-out lg:static lg:mr-3 lg:rounded-lg",
-          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          "premium-panel fixed inset-y-0 left-0 z-50 flex w-[min(20rem,calc(100vw-1.5rem))] transform flex-col overflow-hidden border-r transition-[transform,opacity,width,margin] duration-300 ease-out will-change-transform lg:relative lg:inset-auto lg:w-80 lg:shrink-0 lg:rounded-lg",
+          isOpen
+            ? "translate-x-0 opacity-100 lg:mr-3"
+            : "-translate-x-full opacity-0 pointer-events-none lg:mr-0 lg:w-0 lg:translate-x-0",
         )}
       >
-        <div className="flex items-center justify-between border-b border-border/70 p-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg premium-gradient shadow-lg shadow-primary/20">
+        <div className="flex items-center justify-between gap-3 border-b border-border/70 px-4 py-3.5">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg premium-gradient shadow-lg shadow-primary/20">
               <MessageCircle className="h-4 w-4 text-primary-foreground" />
             </div>
-            <div>
-              <h2 className="text-base font-semibold">{t("chat.sessions")}</h2>
-              <p className="text-xs text-muted-foreground">{t("chat.brandSubtitle")}</p>
+            <div className="min-w-0">
+              <h2 className="truncate text-base font-semibold">{t("chat.sessions")}</h2>
+              <p className="truncate text-xs text-muted-foreground">{t("chat.brandSubtitle")}</p>
             </div>
-            <SettingsDialog />
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="h-8 w-8 lg:hidden"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          <div className="flex shrink-0 items-center gap-1">
+            <SettingsDialog />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="h-8 w-8 lg:hidden"
+              aria-label="Close sidebar"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         <ScrollArea className="flex-1">
-          <div className="space-y-1 p-3">
+          <div className="space-y-1 px-2.5 py-3">
             <ChannelList
               filters={filters}
               sort={sort}
@@ -122,33 +137,44 @@ export const ChatSidebar = ({
               EmptyStateIndicator={ChannelListEmptyStateIndicator}
               Preview={(previewProps) => (
                 <div
+                  role="button"
+                  tabIndex={isOpen ? 0 : -1}
                   className={cn(
-                    "group relative mb-1 flex cursor-pointer items-center rounded-lg border border-transparent p-3 transition-all duration-200",
+                    "group mb-1 grid w-full cursor-pointer grid-cols-[1rem_minmax(0,1fr)_2rem] items-center gap-2 rounded-lg border border-transparent px-2.5 py-2.5 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                     previewProps.active
-                      ? "border-primary/30 bg-primary/12 text-foreground shadow-sm"
-                      : "hover:border-border/80 hover:bg-muted/50",
+                      ? "border-primary/30 bg-primary/10 text-foreground shadow-sm"
+                      : "hover:border-border/80 hover:bg-muted/60",
                   )}
                   onClick={() => {
                     setActiveChannel(previewProps.channel);
                     navigate(`/chat/${previewProps.channel.id}`);
-                    onClose();
+                    closeAfterNavigation();
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setActiveChannel(previewProps.channel);
+                      navigate(`/chat/${previewProps.channel.id}`);
+                      closeAfterNavigation();
+                    }
                   }}
                 >
-                  <MessageSquare className="mr-2 h-4 w-4 text-primary/80" />
-                  <span className="flex-1 truncate text-sm font-medium">
+                  <MessageSquare className="h-4 w-4 text-primary/80" />
+                  <span className="min-w-0 truncate text-sm font-medium leading-5">
                     {previewProps.channel.data?.name || t("chat.newSession")}
                   </span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute right-1 z-10 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100"
+                    className="h-8 w-8 justify-self-end text-muted-foreground opacity-70 transition-all hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 sm:opacity-0 sm:focus-visible:opacity-100"
                     onClick={async (e) => {
                       e.stopPropagation();
                       onChannelDelete(previewProps.channel);
                     }}
                     title={t("dialog.deleteTitle")}
+                    aria-label={t("dialog.deleteTitle")}
                   >
-                    <Trash2 className="h-4 w-4 text-muted-foreground/70 hover:text-destructive" />
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               )}
@@ -168,13 +194,14 @@ export const ChatSidebar = ({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="h-auto w-full items-center justify-start p-2"
+                className="h-auto w-full items-center justify-start p-2 text-left"
+                aria-label={user.name || t("common.online")}
               >
                 <Avatar className="mr-2 h-8 w-8">
                   <AvatarImage src={user.image} alt={user.name} />
                   <AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
                 </Avatar>
-                <div className="flex-1 text-left">
+                <div className="min-w-0 flex-1 text-left">
                   <p className="truncate text-sm font-semibold">{user.name}</p>
                   <p className="text-xs text-muted-foreground">
                     {t("common.online")}
@@ -183,7 +210,12 @@ export const ChatSidebar = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-72" align="end">
-              <DropdownMenuItem onClick={() => navigate("/billing")}>
+              <DropdownMenuItem
+                onClick={() => {
+                  navigate("/billing");
+                  closeAfterNavigation();
+                }}
+              >
                 <CreditCard className="mr-2 h-4 w-4" />
                 <span>{t("billing.title")}</span>
               </DropdownMenuItem>
@@ -194,7 +226,7 @@ export const ChatSidebar = ({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </div>
+      </aside>
     </>
   );
 };

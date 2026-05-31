@@ -27,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface ChatInterfaceProps {
   onToggleSidebar: () => void;
+  isSidebarOpen: boolean;
   onNewChatMessage: (message: { text: string }) => Promise<void>;
   backendUrl: string;
 }
@@ -207,6 +208,7 @@ const MessageListContent = () => {
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   onToggleSidebar,
+  isSidebarOpen,
   onNewChatMessage,
   backendUrl,
 }) => {
@@ -275,7 +277,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             variant="ghost"
             size="icon"
             onClick={onToggleSidebar}
-            className="h-9 w-9 lg:hidden"
+            className="h-9 w-9"
+            aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+            aria-controls="chat-sidebar"
+            aria-expanded={isSidebarOpen}
           >
             <Menu className="h-4 w-4" />
           </Button>
@@ -308,7 +313,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               </span>
             </div>
           )}
-          <SettingsDialog />
+          {!isSidebarOpen && <SettingsDialog />}
         </div>
       </header>
 
