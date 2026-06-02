@@ -14,7 +14,7 @@ export class BillingService {
     {
       id: 'free',
       name: 'Free',
-      description: 'Best for trying the AI writing workspace.',
+      description: 'A light starter plan for quick AI writing help.',
       price: 0,
       interval: 'month',
       features: [
@@ -24,10 +24,23 @@ export class BillingService {
       ],
     },
     {
+      id: 'trial',
+      name: '1 Month Free Trial',
+      description: 'Try premium writing, file analysis, and faster AI for free.',
+      price: 0,
+      interval: 'month',
+      features: [
+        '30 days of Plus access',
+        'Unlimited writing sessions',
+        'PDF and image analysis',
+        'Cancel anytime',
+      ],
+    },
+    {
       id: 'plus',
       name: 'Plus',
-      description: 'For students who need more serious writing support.',
-      price: 900,
+      description: 'Affordable daily writing support for students and creators.',
+      price: 500,
       interval: 'month',
       stripeLookupKey: 'ai_writer_plus_monthly',
       features: [
@@ -40,8 +53,8 @@ export class BillingService {
     {
       id: 'pro',
       name: 'Pro',
-      description: 'For advanced academic and professional workflows.',
-      price: 1900,
+      description: 'Power tools for serious academic and professional work.',
+      price: 1200,
       interval: 'month',
       stripeLookupKey: 'ai_writer_pro_monthly',
       features: [
@@ -92,10 +105,10 @@ export class BillingService {
       throw new BadRequestException('Invalid billing plan');
     }
 
-    if (plan.id === 'free') {
+    if (plan.id === 'free' || plan.id === 'trial') {
       await this.userService.updateUser(userId, {
-        subscriptionPlan: 'free',
-        subscriptionStatus: 'active',
+        subscriptionPlan: plan.id,
+        subscriptionStatus: plan.id === 'trial' ? 'trialing' : 'active',
         stripeSubscriptionId: null,
       });
 
@@ -103,9 +116,12 @@ export class BillingService {
         success: true,
         data: {
           checkoutUrl: null,
-          plan: 'free',
+          plan: plan.id,
         },
-        message: 'Free plan activated.',
+        message:
+          plan.id === 'trial'
+            ? 'Your 1 month free trial is active.'
+            : 'Free plan activated.',
       };
     }
 

@@ -1,6 +1,6 @@
 import api from "./api";
 
-export type BillingPlanId = "free" | "plus" | "pro";
+export type BillingPlanId = "free" | "trial" | "plus" | "pro";
 
 export interface BillingPlan {
   id: BillingPlanId;
@@ -52,4 +52,3 @@ export const billingService = {
     return response.data;
   },
 };
-

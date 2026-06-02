@@ -1,4 +1,4 @@
-export type BillingPlanId = 'free' | 'plus' | 'pro';
+export type BillingPlanId = 'free' | 'trial' | 'plus' | 'pro';
 
 export interface BillingPlan {
   id: BillingPlanId;
@@ -9,4 +9,3 @@ export interface BillingPlan {
   stripeLookupKey?: string;
   features: string[];
 }
-

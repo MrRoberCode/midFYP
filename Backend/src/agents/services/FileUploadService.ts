@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
 import Groq from "groq-sdk";
 
-const pdfParse = require("pdf-parse");
+const { PDFParse } = require("pdf-parse");
 
 export class FileUploadService {
   private groq: Groq;
@@ -26,8 +26,15 @@ export class FileUploadService {
     if (cached) return cached;
 
     const buffer = Buffer.from(base64Data, "base64");
-    const pdfData = await pdfParse(buffer);
-    const extractedText = pdfData.text;
+    const parser = new PDFParse({ data: buffer });
+    let extractedText = "";
+
+    try {
+      const pdfData = await parser.getText();
+      extractedText = pdfData.text;
+    } finally {
+      await parser.destroy();
+    }
 
     if (!extractedText || extractedText.trim().length === 0) {
       throw new Error(

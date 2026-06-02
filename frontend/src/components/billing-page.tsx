@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   Check,
   CreditCard,
+  Gift,
   Loader2,
   ShieldCheck,
   Sparkles,
@@ -30,14 +31,9 @@ import {
 
 const planIcon = {
   free: Sparkles,
+  trial: Gift,
   plus: Zap,
   pro: ShieldCheck,
-};
-
-const featureCount: Record<BillingPlanId, number> = {
-  free: 3,
-  plus: 4,
-  pro: 4,
 };
 
 export const BillingPage = () => {
@@ -56,8 +52,11 @@ export const BillingPage = () => {
   const sessionId = searchParams.get("session_id");
   const checkoutCancelled = searchParams.get("checkout") === "cancelled";
   const currentPlan = subscription?.plan || "free";
+  const currentPlanName =
+    plans.find((plan) => plan.id === currentPlan)?.name ||
+    t(`billing.plan.${currentPlan}`);
   const featuredPlan = useMemo(
-    () => plans.find((plan) => plan.id === "plus"),
+    () => plans.find((plan) => plan.id === "trial") || plans.find((plan) => plan.id === "plus"),
     [plans],
   );
 
@@ -200,7 +199,7 @@ export const BillingPage = () => {
               {t("billing.currentPlan")}
             </p>
             <p className="text-lg font-semibold">
-              {t(`billing.plan.${currentPlan}`)}
+              {currentPlanName}
             </p>
           </div>
         </div>
@@ -212,12 +211,13 @@ export const BillingPage = () => {
           </div>
         )}
 
-        <section className="grid gap-4 lg:grid-cols-3">
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {plans.map((plan) => {
             const Icon = planIcon[plan.id];
             const isCurrent = currentPlan === plan.id;
             const isFeatured = featuredPlan?.id === plan.id;
             const isBusy = checkoutPlan === plan.id;
+            const isTrial = plan.id === "trial";
 
             return (
               <Card
@@ -234,16 +234,17 @@ export const BillingPage = () => {
                       <Icon className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex gap-2">
-                      {isFeatured && <Badge>{t("billing.popular")}</Badge>}
+                      {isTrial && <Badge>1 month free</Badge>}
+                      {isFeatured && !isTrial && <Badge>{t("billing.popular")}</Badge>}
                       {isCurrent && (
                         <Badge variant="secondary">{t("billing.active")}</Badge>
                       )}
                     </div>
                   </div>
                   <div>
-                    <CardTitle>{t(`billing.plan.${plan.id}`)}</CardTitle>
+                    <CardTitle>{plan.name}</CardTitle>
                     <CardDescription className="mt-2">
-                      {t(`billing.plan.${plan.id}.description`)}
+                      {plan.description}
                     </CardDescription>
                   </div>
                   <div className="flex items-end gap-1">
@@ -259,11 +260,10 @@ export const BillingPage = () => {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
-                    {Array.from({ length: featureCount[plan.id] }).map(
-                      (_, index) => (
+                    {plan.features.map((feature, index) => (
                       <li key={`${plan.id}-${index}`} className="flex gap-2 text-sm">
                         <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                        <span>{t(`billing.feature.${plan.id}.${index + 1}`)}</span>
+                        <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -283,7 +283,7 @@ export const BillingPage = () => {
                     ) : isCurrent ? (
                       t("billing.current")
                     ) : plan.price === 0 ? (
-                      t("billing.useFree")
+                      isTrial ? "Start free trial" : t("billing.useFree")
                     ) : (
                       <>
                         <CreditCard className="mr-2 h-4 w-4" />
