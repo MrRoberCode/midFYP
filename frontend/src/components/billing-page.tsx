@@ -5,6 +5,7 @@ import {
   CreditCard,
   Gift,
   Loader2,
+  Menu,
   ShieldCheck,
   Sparkles,
   Zap,
@@ -29,6 +30,11 @@ import {
   billingService,
 } from "@/services/billing.service";
 
+interface BillingPageProps {
+  isSidebarOpen?: boolean;
+  onToggleSidebar?: () => void;
+}
+
 const planIcon = {
   free: Sparkles,
   trial: Gift,
@@ -36,7 +42,10 @@ const planIcon = {
   pro: ShieldCheck,
 };
 
-export const BillingPage = () => {
+export const BillingPage = ({
+  isSidebarOpen = false,
+  onToggleSidebar,
+}: BillingPageProps) => {
   const { t } = usePreferences();
   const [plans, setPlans] = useState<BillingPlan[]>([]);
   const [subscription, setSubscription] = useState<SubscriptionState | null>(
@@ -185,13 +194,28 @@ export const BillingPage = () => {
               <ArrowLeft className="mr-2 h-4 w-4" />
               {t("billing.back")}
             </Button>
-            <div>
-              <h1 className="text-3xl font-semibold tracking-normal">
-                {t("billing.title")}
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t("billing.description")}
-              </p>
+            <div className="flex items-start gap-3">
+              {onToggleSidebar && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onToggleSidebar}
+                  className="mt-1 h-9 w-9 shrink-0 text-muted-foreground"
+                  aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
+                  aria-controls="chat-sidebar"
+                  aria-expanded={isSidebarOpen}
+                >
+                  <Menu className="h-4 w-4" />
+                </Button>
+              )}
+              <div className="min-w-0">
+                <h1 className="text-3xl font-semibold tracking-normal">
+                  {t("billing.title")}
+                </h1>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t("billing.description")}
+                </p>
+              </div>
             </div>
           </div>
           <div className="rounded-lg border border-primary/20 bg-primary/8 px-4 py-3 shadow-sm">

@@ -46,6 +46,12 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
   const backendUrl = import.meta.env.VITE_AI_URL as string;
   const isBillingView = location.pathname.startsWith("/billing");
 
+  useEffect(() => {
+    if (isBillingView) {
+      setSidebarOpen(false);
+    }
+  }, [isBillingView]);
+
   const closeSidebarOnCompactLayout = () => {
     if (window.innerWidth < 1024) {
       setSidebarOpen(false);
@@ -163,7 +169,10 @@ const AuthenticatedCore = ({ user, onLogout }: AuthenticatedAppProps) => {
 
       {isBillingView ? (
         <div className="min-w-0 flex-1 overflow-hidden lg:rounded-lg lg:border lg:border-border/60 lg:bg-card/40">
-          <BillingPage />
+          <BillingPage
+            onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            isSidebarOpen={sidebarOpen}
+          />
         </div>
       ) : (
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden lg:rounded-lg lg:border lg:border-border/60 lg:bg-card/40">
