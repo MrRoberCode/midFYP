@@ -72,8 +72,8 @@ export const AIAgentControl: React.FC<AIAgentControlProps> = ({
         title: status === "connected" ? "AI Disconnected" : "AI Connected",
         description:
           status === "connected"
-            ? "AI assistant has been turned off"
-            : "AI assistant is now active",
+            ? "Textify AI has been turned off"
+            : "Textify AI is now active",
       });
     } catch (err) {
       toast({

@@ -27,7 +27,7 @@ export class EmailService {
         <div style="max-width:560px;margin:0 auto;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 20px 45px rgba(15,23,42,0.12);border:1px solid #e2e8f0;">
           <div style="padding:28px 32px;background:linear-gradient(135deg,#0f172a 0%,#2563eb 100%);color:#ffffff;">
             <div style="display:inline-block;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.14);font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">
-              RH Writing AI Security
+              Textify AI Security
             </div>
             <h1 style="margin:18px 0 8px;font-size:28px;line-height:1.2;">${title}</h1>
             <p style="margin:0;font-size:15px;line-height:1.7;color:rgba(255,255,255,0.9);">
@@ -58,7 +58,7 @@ export class EmailService {
             </div>
 
             <p style="margin:24px 0 0;font-size:13px;line-height:1.7;color:#64748b;">
-              Sent by RH Writing AI Account Protection
+              Sent by Textify AI Account Protection
             </p>
           </div>
         </div>
@@ -80,13 +80,13 @@ export class EmailService {
       expiryMinutes,
       title: 'Confirm your login',
       subtitle:
-        'We received a sign-in request for your RH Writing AI account. Please verify it with the secure code below.',
+        'We received a sign-in request for your Textify AI account. Please verify it with the secure code below.',
     });
 
     await this.transporter.sendMail({
-      from: `"RH Writing AI" <${process.env.EMAIL_USER}>`,
+      from: `"Textify AI" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: 'Your RH Writing AI login code',
+      subject: 'Your Textify AI login code',
       text,
       html,
     });
@@ -102,13 +102,13 @@ export class EmailService {
       expiryMinutes,
       title: 'Reset your password',
       subtitle:
-        'We received a password reset request for your RH Writing AI account. Use the secure code below to continue.',
+        'We received a password reset request for your Textify AI account. Use the secure code below to continue.',
     });
 
     await this.transporter.sendMail({
-      from: `"RH Writing AI" <${process.env.EMAIL_USER}>`,
+      from: `"Textify AI" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: 'Your RH Writing AI password reset code',
+      subject: 'Your Textify AI password reset code',
       text,
       html,
     });

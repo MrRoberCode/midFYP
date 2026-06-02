@@ -90,7 +90,7 @@ export const supplementalTranslations: Record<
     "billing.plan.pro.description":
       "For advanced academic and professional workflows.",
     "billing.feature.free.1": "5 writing sessions",
-    "billing.feature.free.2": "Basic AI assistant access",
+    "billing.feature.free.2": "Basic Textify AI access",
     "billing.feature.free.3": "Community support",
     "billing.feature.plus.1": "Unlimited writing sessions",
     "billing.feature.plus.2": "Priority AI responses",

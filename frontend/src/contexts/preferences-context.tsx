@@ -39,9 +39,9 @@ const en: TranslationMap = {
   "chat.sessions": "Writing Sessions",
   "chat.noSessionsTitle": "No writing sessions yet",
   "chat.noSessionsDescription":
-    "Start a new writing session to begin creating content with your AI assistant.",
+    "Start a new writing session to begin creating content with Textify AI.",
   "chat.noSessionsHint": "Click \"New Writing Session\" to get started",
-  "chat.heroTitle": "Your AI Writing Partner",
+  "chat.heroTitle": "Textify AI",
   "chat.heroDescription":
     "From first drafts to final edits, I'm here to help you write better, faster.",
   "chat.writeToday": "What would you like to write today?",
@@ -87,8 +87,8 @@ const en: TranslationMap = {
   "chat.readyTitle": "Ready to Write",
   "chat.readyDescription":
     "Start the conversation and let's create something amazing together.",
-  "chat.brandSubtitle": "RH Writing AI • Trained by Rai Muhammad Haider",
-  "chat.online": "RH-AI v1.0 • Online",
+  "chat.brandSubtitle": "Textify AI",
+  "chat.online": "Textify AI v1.0 • Online",
   "billing.back": "Back to workspace",
   "billing.title": "Plans & Billing",
   "billing.description":
@@ -103,7 +103,7 @@ const en: TranslationMap = {
   "billing.current": "Current plan",
   "billing.useFree": "Use free plan",
   "billing.upgrade": "Upgrade with Stripe",
-  "auth.loading": "Setting up your AI assistant...",
+  "auth.loading": "Setting up Textify AI...",
   "auth.email": "Email",
   "auth.password": "Password",
   "auth.name": "Name",
@@ -116,7 +116,7 @@ const en: TranslationMap = {
   "auth.noAccount": "Don't have an account?",
   "auth.backToLogin": "Back to login",
   "auth.createAccount": "Create an Account",
-  "auth.createAccountDescription": "Join AI Assistant to start chatting.",
+  "auth.createAccountDescription": "Join Textify AI to start writing.",
   "auth.creatingAccount": "Creating account...",
   "auth.welcomeBack": "Welcome Back",
   "auth.loginDescription": "Enter your credentials to access your account.",
@@ -216,8 +216,8 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "chat.readyTitle": "لکھنے کے لیے تیار",
     "chat.readyDescription":
       "گفتگو شروع کریں اور مل کر کچھ شاندار بناتے ہیں۔",
-    "chat.brandSubtitle": "RH Writing AI • تربیت از رائے محمد حیدر",
-    "chat.online": "RH-AI v1.0 • آن لائن",
+    "chat.brandSubtitle": "Textify AI",
+    "chat.online": "Textify AI v1.0 • آن لائن",
     "billing.back": "ورک اسپیس پر واپس جائیں",
     "billing.title": "پلانز اور بلنگ",
     "billing.description":
@@ -247,7 +247,7 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "auth.backToLogin": "واپس لاگ اِن پر جائیں",
     "auth.createAccount": "اکاؤنٹ بنائیں",
     "auth.createAccountDescription":
-      "چیٹنگ شروع کرنے کے لیے AI Assistant جوائن کریں۔",
+      "چیٹنگ شروع کرنے کے لیے Textify AI جوائن کریں۔",
     "auth.creatingAccount": "اکاؤنٹ بنایا جا رہا ہے...",
     "auth.welcomeBack": "خوش آمدید",
     "auth.loginDescription":
@@ -343,8 +343,8 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "chat.shiftEnter": "Shift + Enter لسطر جديد",
     "chat.readyTitle": "جاهز للكتابة",
     "chat.readyDescription": "ابدأ المحادثة ولنصنع شيئًا رائعًا معًا.",
-    "chat.brandSubtitle": "RH Writing AI • تم تدريبه بواسطة Rai Muhammad Haider",
-    "chat.online": "RH-AI v1.0 • متصل",
+    "chat.brandSubtitle": "Textify AI",
+    "chat.online": "Textify AI v1.0 • متصل",
     "billing.back": "العودة إلى مساحة العمل",
     "billing.title": "الخطط والفواتير",
     "billing.description":
@@ -372,7 +372,7 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "auth.noAccount": "ليس لديك حساب؟",
     "auth.backToLogin": "العودة إلى تسجيل الدخول",
     "auth.createAccount": "إنشاء حساب",
-    "auth.createAccountDescription": "انضم إلى AI Assistant لبدء المحادثة.",
+    "auth.createAccountDescription": "انضم إلى Textify AI لبدء المحادثة.",
     "auth.creatingAccount": "جار إنشاء الحساب...",
     "auth.welcomeBack": "مرحبًا بعودتك",
     "auth.loginDescription": "أدخل بياناتك للوصول إلى حسابك.",
@@ -471,8 +471,8 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "chat.readyTitle": "Listo para escribir",
     "chat.readyDescription":
       "Comienza la conversación y creemos algo increíble juntos.",
-    "chat.brandSubtitle": "RH Writing AI • Entrenado por Rai Muhammad Haider",
-    "chat.online": "RH-AI v1.0 • En línea",
+    "chat.brandSubtitle": "Textify AI",
+    "chat.online": "Textify AI v1.0 • En línea",
     "billing.back": "Volver al espacio de trabajo",
     "billing.title": "Planes y facturación",
     "billing.description":
@@ -502,7 +502,7 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "auth.backToLogin": "Volver al inicio de sesión",
     "auth.createAccount": "Crear una cuenta",
     "auth.createAccountDescription":
-      "Únete a AI Assistant para empezar a chatear.",
+      "Únete a Textify AI para empezar a chatear.",
     "auth.creatingAccount": "Creando cuenta...",
     "auth.welcomeBack": "Bienvenido de nuevo",
     "auth.loginDescription":
@@ -605,8 +605,8 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "chat.readyTitle": "Prêt à écrire",
     "chat.readyDescription":
       "Commencez la conversation et créons ensemble quelque chose d'extraordinaire.",
-    "chat.brandSubtitle": "RH Writing AI • Entraîné par Rai Muhammad Haider",
-    "chat.online": "RH-AI v1.0 • En ligne",
+    "chat.brandSubtitle": "Textify AI",
+    "chat.online": "Textify AI v1.0 • En ligne",
     "billing.back": "Retour à l'espace de travail",
     "billing.title": "Forfaits et facturation",
     "billing.description":
@@ -636,7 +636,7 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "auth.backToLogin": "Retour à la connexion",
     "auth.createAccount": "Créer un compte",
     "auth.createAccountDescription":
-      "Rejoignez AI Assistant pour commencer à discuter.",
+      "Rejoignez Textify AI pour commencer à discuter.",
     "auth.creatingAccount": "Création du compte...",
     "auth.welcomeBack": "Bon retour",
     "auth.loginDescription":
@@ -738,8 +738,8 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "chat.readyTitle": "Bereit zum Schreiben",
     "chat.readyDescription":
       "Starte das Gespräch und lass uns gemeinsam etwas Großartiges schaffen.",
-    "chat.brandSubtitle": "RH Writing AI • Trainiert von Rai Muhammad Haider",
-    "chat.online": "RH-AI v1.0 • Online",
+    "chat.brandSubtitle": "Textify AI",
+    "chat.online": "Textify AI v1.0 • Online",
     "billing.back": "Zurück zum Arbeitsbereich",
     "billing.title": "Pläne und Abrechnung",
     "billing.description":
@@ -769,7 +769,7 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "auth.backToLogin": "Zurück zur Anmeldung",
     "auth.createAccount": "Konto erstellen",
     "auth.createAccountDescription":
-      "Tritt AI Assistant bei, um mit dem Chatten zu beginnen.",
+      "Tritt Textify AI bei, um mit dem Chatten zu beginnen.",
     "auth.creatingAccount": "Konto wird erstellt...",
     "auth.welcomeBack": "Willkommen zurück",
     "auth.loginDescription":
@@ -871,8 +871,8 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "chat.readyTitle": "लिखने के लिए तैयार",
     "chat.readyDescription":
       "बातचीत शुरू करें और मिलकर कुछ शानदार बनाएं।",
-    "chat.brandSubtitle": "RH Writing AI • Rai Muhammad Haider द्वारा प्रशिक्षित",
-    "chat.online": "RH-AI v1.0 • ऑनलाइन",
+    "chat.brandSubtitle": "Textify AI",
+    "chat.online": "Textify AI v1.0 • ऑनलाइन",
     "billing.back": "वर्कस्पेस पर वापस जाएं",
     "billing.title": "प्लान और बिलिंग",
     "billing.description":
@@ -902,7 +902,7 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "auth.backToLogin": "लॉग इन पर वापस जाएं",
     "auth.createAccount": "अकाउंट बनाएं",
     "auth.createAccountDescription":
-      "चैटिंग शुरू करने के लिए AI Assistant जॉइन करें।",
+      "चैटिंग शुरू करने के लिए Textify AI जॉइन करें।",
     "auth.creatingAccount": "अकाउंट बनाया जा रहा है...",
     "auth.welcomeBack": "वापसी पर स्वागत है",
     "auth.loginDescription":
@@ -1004,8 +1004,8 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "chat.readyTitle": "Yazmaya hazır",
     "chat.readyDescription":
       "Konuşmayı başlatın ve birlikte harika bir şey oluşturalım.",
-    "chat.brandSubtitle": "RH Writing AI • Rai Muhammad Haider tarafından eğitildi",
-    "chat.online": "RH-AI v1.0 • Çevrimiçi",
+    "chat.brandSubtitle": "Textify AI",
+    "chat.online": "Textify AI v1.0 • Çevrimiçi",
     "billing.back": "Çalışma alanına dön",
     "billing.title": "Planlar ve faturalandırma",
     "billing.description":
@@ -1035,7 +1035,7 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "auth.backToLogin": "Girişe dön",
     "auth.createAccount": "Hesap oluştur",
     "auth.createAccountDescription":
-      "Sohbete başlamak için AI Assistant'a katılın.",
+      "Sohbete başlamak için Textify AI'a katılın.",
     "auth.creatingAccount": "Hesap oluşturuluyor...",
     "auth.welcomeBack": "Tekrar hoş geldiniz",
     "auth.loginDescription":
@@ -1134,8 +1134,8 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "chat.shiftEnter": "Shift + Enter 换行",
     "chat.readyTitle": "准备写作",
     "chat.readyDescription": "开始对话，让我们一起创作精彩内容。",
-    "chat.brandSubtitle": "RH Writing AI • 由 Rai Muhammad Haider 训练",
-    "chat.online": "RH-AI v1.0 • 在线",
+    "chat.brandSubtitle": "Textify AI",
+    "chat.online": "Textify AI v1.0 • 在线",
     "billing.back": "返回工作区",
     "billing.title": "套餐与账单",
     "billing.description":
@@ -1163,7 +1163,7 @@ const translations: Record<SupportedLanguage, TranslationMap> = {
     "auth.noAccount": "还没有账户？",
     "auth.backToLogin": "返回登录",
     "auth.createAccount": "创建账户",
-    "auth.createAccountDescription": "加入 AI Assistant 开始聊天。",
+    "auth.createAccountDescription": "加入 Textify AI 开始聊天。",
     "auth.creatingAccount": "正在创建账户...",
     "auth.welcomeBack": "欢迎回来",
     "auth.loginDescription": "输入你的凭据以访问账户。",

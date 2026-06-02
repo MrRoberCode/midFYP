@@ -19,7 +19,7 @@ export class BillingService {
       interval: 'month',
       features: [
         '5 writing sessions',
-        'Basic AI assistant access',
+        'Basic Textify AI access',
         'Community support',
       ],
     },
@@ -142,7 +142,7 @@ export class BillingService {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: `AI Writer ${plan.name}`,
+              name: `Textify AI ${plan.name}`,
               description: plan.description,
             },
             recurring: {

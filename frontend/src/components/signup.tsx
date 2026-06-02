@@ -179,7 +179,7 @@ export const Signup: React.FC<SignupProps> = ({ onSwitchToLogin }) => {
                   <Bot className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="font-semibold">AI assistant ready</p>
+                  <p className="font-semibold">Textify AI ready</p>
                   <p className="text-sm text-muted-foreground">
                     Clean onboarding into your chat experience.
                   </p>

@@ -68,7 +68,7 @@ setInterval(async () => {
 // Health check
 app.get("/", (req, res) => {
   res.json({
-    message: "AI Writing Assistant Server",
+    message: "Textify AI Server",
     version: "2.0.0",
     provider: "Groq - llama-3.3-70b-versatile",
     features: [
@@ -102,7 +102,7 @@ app.post("/start-ai-agent", async (req, res) => {
 
       await serverClient.upsertUser({
         id: user_id,
-        name: "AI Writing Assistant",
+        name: "Textify AI",
       });
 
       const channel = serverClient.channel(channel_type, channel_id);
@@ -420,7 +420,7 @@ async function disposeAiAgent(aiAgent: AIAgent) {
 
 const port = process.env.PORT || 333333;
 app.listen(port, () => {
-  console.log(`\n🚀 AI Writing Assistant Server v2.0`);
+  console.log(`\n🚀 Textify AI Server v2.0`);
   console.log(`📍 Running on http://localhost:${port}`);
   console.log(`🤖 Provider: Groq - llama-3.3-70b-versatile (FREE)`);
   console.log(`🔍 Search: DuckDuckGo (FREE)`);

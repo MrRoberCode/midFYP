@@ -21,7 +21,7 @@ export class DuckDuckGoService {
 
       const response = await fetch(`${this.DDG_API}?${params}`, {
         headers: {
-          "User-Agent": "AI-Writing-Assistant/1.0",
+          "User-Agent": "Textify-AI/1.0",
         },
       });
 
