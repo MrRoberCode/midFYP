@@ -30,7 +30,7 @@ const en: TranslationMap = {
   "settings.dataControls": "Data controls",
   "settings.improveTitle": "Improve the model for everyone",
   "settings.improveDescription":
-    "Allow your content to be used to train our models, which makes ChatGPT better for you and everyone who uses it. We take steps to protect your privacy.",
+    "Allow your content to be used to train our models, which makes Textify better for you and everyone who uses it. We take steps to protect your privacy.",
   "settings.learnMore": "Learn more",
   "theme.system": "System",
   "theme.dark": "Dark",
