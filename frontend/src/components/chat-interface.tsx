@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAIAgentStatus } from "@/hooks/use-ai-agent-status";
 import { usePreferences } from "@/contexts/preferences-context";
 import {
@@ -187,11 +187,40 @@ const MessageListEmptyIndicator = () => {
 
 const MessageListContent = () => {
   const { messages, thread } = useChannelStateContext();
+  const listWrapperRef = useRef<HTMLDivElement>(null);
+
+  const handleWheelCapture = useCallback(
+    (event: React.WheelEvent<HTMLDivElement>) => {
+      const wrapper = listWrapperRef.current;
+      if (!wrapper || !messages?.length) return;
+
+      const scrollElement = wrapper.querySelector<HTMLElement>(
+        ".str-chat__message-list-scroll, .str-chat__virtual-list, .str-chat__list"
+      );
+
+      if (!scrollElement || event.deltaY === 0) return;
+
+      const deltaY =
+        event.deltaMode === WheelEvent.DOM_DELTA_LINE
+          ? event.deltaY * 16
+          : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+            ? event.deltaY * scrollElement.clientHeight
+            : event.deltaY;
+
+      scrollElement.scrollTop += deltaY;
+      event.preventDefault();
+    },
+    [messages?.length]
+  );
 
   if (thread) return null;
 
   return (
-    <div className="min-h-0 min-w-0 flex-1">
+    <div
+      ref={listWrapperRef}
+      onWheelCapture={handleWheelCapture}
+      className="min-h-0 min-w-0 flex-1"
+    >
       {!messages?.length ? (
         <MessageListEmptyIndicator />
       ) : (
